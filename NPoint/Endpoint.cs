@@ -15,7 +15,7 @@ namespace NPoint
         private IHttpRequestDispatcher RequestDispatcher { get; }
         private EndpointParameter Parameter { get; }
 
-        public Endpoint() : this(new HttpRequestBuilderFactory(), new HttpRequestDispatcher(new HttpClientFactory()), new EndpointParameter { Timeout = DefaultTimeout }) { }
+        public Endpoint() : this(new HttpRequestBuilderFactory(), new HttpRequestDispatcher(), new EndpointParameter { Timeout = DefaultTimeout }) { }
 
         public Endpoint(IHttpRequestBuilderFactory requestBuilderFactory, IHttpRequestDispatcher requestDispatcher, EndpointParameter parameter)
         {
@@ -181,6 +181,8 @@ namespace NPoint
 
         public IEndpoint RequestWith(Action<IHttpRequestBuilder> requestSpec)
         {
+            if (requestSpec == null) throw new ArgumentNullException(nameof(requestSpec));
+
             return AppendSpec(requestSpec);
         }
 

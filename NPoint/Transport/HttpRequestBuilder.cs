@@ -1,5 +1,6 @@
 ﻿using NPoint.Serialization;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -7,20 +8,22 @@ using System.Text;
 
 namespace NPoint.Transport
 {
-    // TODO: Make this class immutable
     public class HttpRequestBuilder : IHttpRequestBuilder
     {
+        private IEnumerable<Action<HttpRequestMessage>> BuildSpecs { get; }
         private IUriQueryAppender QueryAppender { get; }
         private IJsonSerializer Serializer { get; }
-        public HttpRequestMessage Request { get; private set; }
 
-        public HttpRequestBuilder(IUriQueryAppender queryAppender, IJsonSerializer serializer)
+        public HttpRequestBuilder(IUriQueryAppender queryAppender, IJsonSerializer serializer) : this(queryAppender, serializer, new List<Action<HttpRequestMessage>>()) { }
+
+        public HttpRequestBuilder(IUriQueryAppender queryAppender, IJsonSerializer serializer, IEnumerable<Action<HttpRequestMessage>> buildSpecs)
         {
             if (queryAppender == null) throw new ArgumentNullException(nameof(queryAppender));
             if (serializer == null) throw new ArgumentNullException(nameof(serializer));
+            if (buildSpecs == null) throw new ArgumentNullException(nameof(buildSpecs));
 
+            BuildSpecs = buildSpecs;
             QueryAppender = queryAppender;
-            Request = new HttpRequestMessage();
             Serializer = serializer;
         }
 
@@ -28,30 +31,32 @@ namespace NPoint.Transport
         {
             if (string.IsNullOrEmpty(name)) throw new ArgumentException("String cannot be null or empty", nameof(name));
             if (string.IsNullOrEmpty(value)) throw new ArgumentException("String cannot be null or empty", nameof(value));
-            if (Request.RequestUri == null) throw new InvalidOperationException($"Request URI is null, call {nameof(SetEndpoint)} first");
 
-            Request.RequestUri = QueryAppender.AppendQuery(Request.RequestUri, name, value);
-
-            return this;
+            return AppendSpec(request => request.RequestUri = QueryAppender.AppendQuery(request.RequestUri, name, value));
         }
 
         public HttpRequestBuilder AddQuery(NameValueCollection nameValues)
         {
             if (nameValues == null) throw new ArgumentNullException(nameof(nameValues));
-            if (Request.RequestUri == null) throw new InvalidOperationException($"Request URI is null, call {nameof(SetEndpoint)} first");
 
-            Request.RequestUri = QueryAppender.AppendQuery(Request.RequestUri, nameValues);
-
-            return this;
+            return AppendSpec(request => request.RequestUri = QueryAppender.AppendQuery(request.RequestUri, nameValues));
         }
 
         public HttpRequestBuilder SetAccept(string accept)
         {
             if (string.IsNullOrEmpty(accept)) throw new ArgumentException("String cannot be null or empty", nameof(accept));
 
-            Request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(accept));
+            return AppendSpec(request => request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(accept)));
+        }
 
-            return this;
+        private HttpRequestBuilder AppendSpec(Action<HttpRequestMessage> spec)
+        {
+            if (spec == null) throw new ArgumentNullException(nameof(spec));
+
+            var specs = new List<Action< HttpRequestMessage>>(BuildSpecs);
+            specs.Add(spec);
+
+            return new HttpRequestBuilder(QueryAppender, Serializer, specs);
         }
 
         public HttpRequestBuilder SetBody(string body, string contentType = null)

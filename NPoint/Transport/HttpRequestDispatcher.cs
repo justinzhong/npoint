@@ -9,6 +9,8 @@ namespace NPoint.Transport
     {
         private IHttpClientFactory HttpClientFactory { get; }
 
+        public HttpRequestDispatcher() : this(new HttpClientFactory()) { }
+
         public HttpRequestDispatcher(IHttpClientFactory httpClientFactory)
         {
             if (httpClientFactory == null) throw new ArgumentNullException(nameof(httpClientFactory));
