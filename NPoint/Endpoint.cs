@@ -224,7 +224,7 @@ namespace NPoint
 
             foreach (var spec in requestSpecs) spec(requestBuilder);
 
-            return requestBuilder.Request;
+            return requestBuilder.Build();
         }
 
         private async Task<string> ReadResponse(HttpResponseMessage response)

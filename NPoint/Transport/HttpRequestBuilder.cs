@@ -13,10 +13,16 @@ namespace NPoint.Transport
         private IEnumerable<Action<HttpRequestMessage>> BuildSpecs { get; }
         private IUriQueryAppender QueryAppender { get; }
         private IJsonSerializer Serializer { get; }
+        private HttpRequestMessage RequestBaseline { get; }
 
-        public HttpRequestBuilder(IUriQueryAppender queryAppender, IJsonSerializer serializer) : this(queryAppender, serializer, new List<Action<HttpRequestMessage>>()) { }
+        public HttpRequestBuilder(IUriQueryAppender queryAppender, IJsonSerializer serializer) :
+            this(queryAppender, serializer, new List<Action<HttpRequestMessage>>())
+        { }
 
-        public HttpRequestBuilder(IUriQueryAppender queryAppender, IJsonSerializer serializer, IEnumerable<Action<HttpRequestMessage>> buildSpecs)
+        public HttpRequestBuilder(
+            IUriQueryAppender queryAppender,
+            IJsonSerializer serializer,
+            IEnumerable<Action<HttpRequestMessage>> buildSpecs)
         {
             if (queryAppender == null) throw new ArgumentNullException(nameof(queryAppender));
             if (serializer == null) throw new ArgumentNullException(nameof(serializer));
@@ -24,6 +30,22 @@ namespace NPoint.Transport
 
             BuildSpecs = buildSpecs;
             QueryAppender = queryAppender;
+            RequestBaseline = new HttpRequestMessage();
+            Serializer = serializer;
+        }
+
+        public HttpRequestBuilder(
+            IUriQueryAppender queryAppender,
+            IJsonSerializer serializer,
+            HttpRequestMessage requestBaseline)
+        {
+            if (queryAppender == null) throw new ArgumentNullException(nameof(queryAppender));
+            if (serializer == null) throw new ArgumentNullException(nameof(serializer));
+            if (requestBaseline == null) throw new ArgumentNullException(nameof(requestBaseline));
+
+            BuildSpecs = new List<Action<HttpRequestMessage>>();
+            QueryAppender = queryAppender;
+            RequestBaseline = requestBaseline;
             Serializer = serializer;
         }
 
@@ -42,6 +64,13 @@ namespace NPoint.Transport
             return AppendSpec(request => request.RequestUri = QueryAppender.AppendQuery(request.RequestUri, nameValues));
         }
 
+        public HttpRequestMessage Build()
+        {
+            foreach (var spec in BuildSpecs) spec(RequestBaseline);
+
+            return RequestBaseline;
+        }
+
         public HttpRequestBuilder SetAccept(string accept)
         {
             if (string.IsNullOrEmpty(accept)) throw new ArgumentException("String cannot be null or empty", nameof(accept));
@@ -49,92 +78,68 @@ namespace NPoint.Transport
             return AppendSpec(request => request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(accept)));
         }
 
-        private HttpRequestBuilder AppendSpec(Action<HttpRequestMessage> spec)
-        {
-            if (spec == null) throw new ArgumentNullException(nameof(spec));
-
-            var specs = new List<Action< HttpRequestMessage>>(BuildSpecs);
-            specs.Add(spec);
-
-            return new HttpRequestBuilder(QueryAppender, Serializer, specs);
-        }
-
-        public HttpRequestBuilder SetBody(string body, string contentType = null)
+        public HttpRequestBuilder SetBody(string body, string contentType)
         {
             if (string.IsNullOrEmpty(body)) throw new ArgumentException("String cannot be null or empty", nameof(body));
+            if (string.IsNullOrEmpty(contentType)) throw new ArgumentException("String cannot be null or empty", nameof(contentType));
 
-            Request.Content = BuildMessageContent(body, contentType);
-
-            return this;
-        }
-
-        public HttpRequestBuilder SetEndpoint(string url)
-        {
-            if (string.IsNullOrEmpty(url)) throw new ArgumentException("String cannot be null or empty", nameof(url));
-
-            Request.RequestUri = new Uri(url);
-
-            return this;
+            return AppendSpec(request => request.Content = BuildMessageContent(body, contentType));
         }
 
         public HttpRequestBuilder SetEndpoint(Uri url)
         {
             if (url == null) throw new ArgumentNullException(nameof(url));
 
-            Request.RequestUri = url;
-
-            return this;
+            return AppendSpec(request => request.RequestUri = url);
         }
 
         public HttpRequestBuilder SetHeaders(Action<HttpRequestHeaders> headersSpec)
         {
             if (headersSpec == null) throw new ArgumentNullException(nameof(headersSpec));
 
-            headersSpec(Request.Headers);
-
-            return this;
+            return AppendSpec(request => headersSpec(request.Headers));
         }
 
         public HttpRequestBuilder SetHttpMethod(HttpMethod method)
         {
             if (method == null) throw new ArgumentNullException(nameof(method));
 
-            Request.Method = method;
-
-            return this;
+            return AppendSpec(request => request.Method = method);
         }
 
-        public HttpRequestBuilder SetJson<TPayload>(TPayload payload, string contentType = "application/json")
+        public HttpRequestBuilder SetJson<TPayload>(TPayload payload)
         {
             if (payload == null) throw new ArgumentNullException(nameof(payload));
 
-            var body = Serializer.Serialize(payload);
-
-            SetBody(body, contentType);
-
-            return this;
+            return AppendSpec(request =>
+            {
+                var body = Serializer.Serialize(payload);
+                request.Content = BuildMessageContent(body, "application/json");
+            });
         }
 
         public HttpRequestBuilder SetRequest(HttpRequestMessage request)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
 
-            Request = request;
+            return new HttpRequestBuilder(QueryAppender, Serializer, request);
+        }
 
-            return this;
+        private HttpRequestBuilder AppendSpec(Action<HttpRequestMessage> spec)
+        {
+            if (spec == null) throw new ArgumentNullException(nameof(spec));
+
+            var specs = new List<Action<HttpRequestMessage>>(BuildSpecs);
+            specs.Add(spec);
+
+            return new HttpRequestBuilder(QueryAppender, Serializer, specs);
         }
 
         private HttpContent BuildMessageContent(string body, string contentType)
         {
-            if (string.IsNullOrEmpty(body)) return null;
-
             var content = new StringContent(body, Encoding.UTF8);
-
-            if (!string.IsNullOrEmpty(contentType))
-            {
-                content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-                content.Headers.ContentType.CharSet = Encoding.UTF8.WebName;
-            }
+            content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+            content.Headers.ContentType.CharSet = Encoding.UTF8.WebName;
 
             return content;
         }
