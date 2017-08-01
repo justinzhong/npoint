@@ -1,80 +1,242 @@
-﻿using NPoint.Config;
-using NPoint.Parsers;
-using NPoint.Transport;
+﻿using NPoint.Transport;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace NPoint
 {
     public class Endpoint : IEndpoint
     {
-        private INPointConfig Config { get; }
+        public static readonly int DefaultTimeout = 60;
+
         private IHttpRequestBuilderFactory RequestBuilderFactory { get; }
         private IHttpRequestDispatcher RequestDispatcher { get; }
-        private IResponseParser ResponseParser { get; }
+        private EndpointParameter Parameter { get; }
 
-        public Endpoint(IHttpRequestBuilderFactory requestBuilderFactory,
-            IHttpRequestDispatcher requestDispatcher,
-            IResponseParser responseParser) : this(new DefaultNPointConfig(), requestBuilderFactory, requestDispatcher, responseParser) { }
+        public Endpoint() : this(new HttpRequestBuilderFactory(), new HttpRequestDispatcher(new HttpClientFactory()), new EndpointParameter { Timeout = DefaultTimeout }) { }
 
-        public Endpoint(INPointConfig config, 
-            IHttpRequestBuilderFactory requestBuilderFactory,
-            IHttpRequestDispatcher requestDispatcher,
-            IResponseParser responseParser)
+        public Endpoint(IHttpRequestBuilderFactory requestBuilderFactory, IHttpRequestDispatcher requestDispatcher, EndpointParameter parameter)
         {
-            if (config == null) throw new ArgumentNullException(nameof(config));
             if (requestBuilderFactory == null) throw new ArgumentNullException(nameof(requestBuilderFactory));
             if (requestDispatcher == null) throw new ArgumentNullException(nameof(requestDispatcher));
-            if (responseParser == null) throw new ArgumentNullException(nameof(responseParser));
+            if (parameter == null) throw new ArgumentNullException(nameof(parameter));
 
-            Config = config;
             RequestBuilderFactory = requestBuilderFactory;
             RequestDispatcher = requestDispatcher;
-            ResponseParser = responseParser;
+            Parameter = parameter;
         }
 
-        public async Task<string> Invoke(HttpRequestMessage request)
+        public async Task<string> Call()
+        {
+            var response = await RequestDispatcher.Dispatch(BuildRequest(Parameter.RequestSpecs), Parameter.Timeout);
+            var responseBody = await ReadResponse(response);
+
+            return responseBody;
+        }
+
+        public async Task<TResponse> Call<TResponse>(Func<string, TResponse> converter)
+            where TResponse : class
+        {
+            if (converter == null) throw new ArgumentNullException(nameof(converter));
+
+            var responseBody = await Call();
+
+            return converter(responseBody);
+        }
+
+        public IEndpoint Delete(Uri url)
+        {
+            if (url == null) throw new ArgumentNullException(nameof(url));
+
+            return AppendSpec(builder => builder.SetEndpoint(url)
+                .SetHttpMethod(HttpMethod.Delete));
+        }
+
+        public IEndpoint Delete(Uri url, Action<HttpRequestHeaders> headersSpec)
+        {
+            if (headersSpec == null) throw new ArgumentNullException(nameof(headersSpec));
+
+            return AppendSpec(builder => builder.SetEndpoint(url)
+                .SetHttpMethod(HttpMethod.Delete)
+                .SetHeaders(headersSpec));
+        }
+
+        public IEndpoint Get(Uri url)
+        {
+            if (url == null) throw new ArgumentNullException(nameof(url));
+
+            return AppendSpec(builder => builder.SetEndpoint(url)
+                .SetHttpMethod(HttpMethod.Get));
+        }
+
+        public IEndpoint Get(Uri url, Action<HttpRequestHeaders> headersSpec)
+        {
+            if (url == null) throw new ArgumentNullException(nameof(url));
+            if (headersSpec == null) throw new ArgumentNullException(nameof(headersSpec));
+
+            return AppendSpec(builder => builder.SetEndpoint(url)
+                .SetHttpMethod(HttpMethod.Get)
+                .SetHeaders(headersSpec));
+        }
+
+        public async Task<HttpResponseMessage> Head(Uri url)
+        {
+            if (url == null) throw new ArgumentNullException(nameof(url));
+
+            var requestSpecs = new List<Action<IHttpRequestBuilder>>
+            {
+                builder => builder.SetEndpoint(url)
+                    .SetHttpMethod(HttpMethod.Head)
+            };
+            var request = BuildRequest(requestSpecs);
+            var response = await RequestDispatcher.Dispatch(request, Parameter.Timeout);
+
+            return response;
+        }
+
+        public async Task<HttpResponseMessage> Head(Uri url, Action<HttpRequestHeaders> headers)
+        {
+            if (url == null) throw new ArgumentNullException(nameof(url));
+
+            var requestSpecs = new List<Action<IHttpRequestBuilder>>
+            {
+                builder => builder.SetEndpoint(url)
+                    .SetHttpMethod(HttpMethod.Head)
+                    .SetHeaders(headers)
+            };
+            var request = BuildRequest(requestSpecs);
+            var response = await RequestDispatcher.Dispatch(request, Parameter.Timeout);
+
+            return response;
+        }
+
+        public IEndpoint Post(Uri url, string body, string contentType)
+        {
+            if (url == null) throw new ArgumentNullException(nameof(url));
+            if (string.IsNullOrEmpty(body)) throw new ArgumentException("String cannot be empty or null", nameof(body));
+            if (string.IsNullOrEmpty(contentType)) throw new ArgumentException("String cannot be empty or null", nameof(contentType));
+
+            return AppendSpec(builder => builder.SetEndpoint(url)
+                .SetBody(body, contentType)
+                .SetHttpMethod(HttpMethod.Post));
+        }
+
+        public IEndpoint Post(Uri url, string body, string contentType, Action<HttpRequestHeaders> headersSpec)
+        {
+            if (url == null) throw new ArgumentNullException(nameof(url));
+            if (string.IsNullOrEmpty(body)) throw new ArgumentException("String cannot be empty or null", nameof(body));
+            if (string.IsNullOrEmpty(contentType)) throw new ArgumentException("String cannot be empty or null", nameof(contentType));
+            if (headersSpec == null) throw new ArgumentNullException(nameof(headersSpec));
+
+            return AppendSpec(builder => builder.SetEndpoint(url)
+                .SetBody(body, contentType)
+                .SetHttpMethod(HttpMethod.Post)
+                .SetHeaders(headersSpec));
+        }
+
+        public IEndpoint Put(Uri url, string body, string contentType)
+        {
+            if (url == null) throw new ArgumentNullException(nameof(url));
+            if (string.IsNullOrEmpty(body)) throw new ArgumentException("String cannot be empty or null", nameof(body));
+            if (string.IsNullOrEmpty(contentType)) throw new ArgumentException("String cannot be empty or null", nameof(contentType));
+
+            return AppendSpec(builder => builder.SetEndpoint(url)
+                .SetBody(body, contentType)
+                .SetHttpMethod(HttpMethod.Put));
+        }
+
+        public IEndpoint Put(Uri url, string body, string contentType, Action<HttpRequestHeaders> headersSpec)
+        {
+            if (url == null) throw new ArgumentNullException(nameof(url));
+            if (string.IsNullOrEmpty(body)) throw new ArgumentException("String cannot be empty or null", nameof(body));
+            if (string.IsNullOrEmpty(contentType)) throw new ArgumentException("String cannot be empty or null", nameof(contentType));
+            if (headersSpec == null) throw new ArgumentNullException(nameof(headersSpec));
+
+            return AppendSpec(builder => builder.SetEndpoint(url)
+                .SetBody(body, contentType)
+                .SetHttpMethod(HttpMethod.Put)
+                .SetHeaders(headersSpec));
+        }
+
+        public IEndpoint OnReceived(Action<HttpResponseMessage> callback)
+        {
+            if (callback == null) throw new ArgumentNullException(nameof(callback));
+
+            return PassOn(new EndpointParameter
+            {
+                Callback = callback,
+                RequestSpecs = Parameter.RequestSpecs,
+                Timeout = Parameter.Timeout
+            });
+        }
+
+        public IEndpoint RequestWith(HttpRequestMessage request)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
 
-            var response = await RequestDispatcher.DispatchRequest(request, Config.RequestTimeout);
-
-            return response;
+            return PassOn(new EndpointParameter
+            {
+                Callback = Parameter.Callback,
+                Request = request,
+                Timeout = Parameter.Timeout
+            });
         }
 
-        public async Task<string> Invoke(Action<IHttpRequestBuilder> requestSpec)
+        public IEndpoint RequestWith(Action<IHttpRequestBuilder> requestSpec)
         {
-            if (requestSpec == null) throw new ArgumentNullException(nameof(requestSpec));
-
-            var requestBuilderInstance = RequestBuilderFactory.Create(); // Always use clean nappies
-            requestSpec(requestBuilderInstance);
-            var request = requestBuilderInstance.Request;
-            var response = await RequestDispatcher.DispatchRequest(request, Config.RequestTimeout);
-
-            return response;
+            return AppendSpec(requestSpec);
         }
 
-        public async Task<TResponse> Invoke<TResponse>(HttpRequestMessage request)
-            where TResponse : class
+        public IEndpoint TimeoutWhen(int timeout)
         {
-            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (timeout < 0) throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout must be a non-negative value");
 
-            var responseString = await Invoke(request);
-            var response = ResponseParser.ParseResponse<TResponse>(responseString);
-
-            return response;
+            return PassOn(new EndpointParameter
+            {
+                Callback = Parameter.Callback,
+                RequestSpecs = Parameter.RequestSpecs,
+                Timeout = timeout
+            });
         }
 
-        public async Task<TResponse> Invoke<TResponse>(Action<IHttpRequestBuilder> requestSpec)
-            where TResponse : class
+        private IEndpoint AppendSpec(Action<IHttpRequestBuilder> requestSpec)
         {
-            if (requestSpec == null) throw new ArgumentNullException(nameof(requestSpec));
+            var appendedSpecs = new List<Action<IHttpRequestBuilder>>(Parameter.RequestSpecs);
+            appendedSpecs.Add(requestSpec);
 
-            var responseString = await Invoke(requestSpec);
-            var response = ResponseParser.ParseResponse<TResponse>(responseString);
+            return PassOn(new EndpointParameter
+            {
+                Callback = Parameter.Callback,
+                RequestSpecs = appendedSpecs,
+                Timeout = Parameter.Timeout
+            });
+        }
 
-            return response;
+        private IEndpoint PassOn(EndpointParameter parameter)
+        {
+            return new Endpoint(RequestBuilderFactory, RequestDispatcher, parameter);
+        }
+
+        private HttpRequestMessage BuildRequest(IEnumerable<Action<IHttpRequestBuilder>> requestSpecs)
+        {
+            if (requestSpecs == null) throw new InvalidOperationException("No request specified");
+
+            var requestBuilder = RequestBuilderFactory.Create();
+
+            foreach (var spec in requestSpecs) spec(requestBuilder);
+
+            return requestBuilder.Request;
+        }
+
+        private async Task<string> ReadResponse(HttpResponseMessage response)
+        {
+            Parameter.Callback?.Invoke(response);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            return responseString;
         }
     }
 }

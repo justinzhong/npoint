@@ -27,7 +27,7 @@ namespace NPoint.Tests.Transport
             var httpClientFactory = httpClientFactorySpecified ? Substitute.For<IHttpClientFactory>() : default(IHttpClientFactory);
 
             // Act
-            Action activity = () => new HttpRequestDispatcher(filterRegistry, httpClientFactory);
+            Action activity = () => new Endpoint(filterRegistry, httpClientFactory);
 
             // Assert
             activity.ShouldThrowExactly<ArgumentNullException>().And.ParamName.ShouldBeEquivalentTo(argName);
@@ -41,7 +41,7 @@ namespace NPoint.Tests.Transport
             var timeout = new Fixture().Create<int>();
 
             // Act
-            var sut = new HttpRequestDispatcher(filterRegistry, httpClientFactory);
+            var sut = new Endpoint(filterRegistry, httpClientFactory);
             Func<Task<string>> activity = async () => await sut.DispatchRequest(request, timeout);
 
             // Assert
@@ -64,7 +64,7 @@ namespace NPoint.Tests.Transport
             filterRegistry.Filters.Returns(new List<Func<IRequestFilter>>());
 
             // Act
-            var sut = new HttpRequestDispatcher(filterRegistry, httpClientFactory);
+            var sut = new Endpoint(filterRegistry, httpClientFactory);
             Func<Task<string>> activity = async () => await sut.DispatchRequest(request, timeout);
 
             // Assert
@@ -88,7 +88,7 @@ namespace NPoint.Tests.Transport
             filterRegistry.Filters.Returns(new List<Func<IRequestFilter>>());
 
             // Act
-            var sut = new HttpRequestDispatcher(filterRegistry, httpClientFactory);
+            var sut = new Endpoint(filterRegistry, httpClientFactory);
             Func<Task<string>> activity = async () => await sut.DispatchRequest(request, timeout);
 
             // Assert
@@ -112,7 +112,7 @@ namespace NPoint.Tests.Transport
             filterRegistry.Filters.Returns(new List<Func<IRequestFilter>>());
 
             // Act
-            var sut = new HttpRequestDispatcher(filterRegistry, httpClientFactory);
+            var sut = new Endpoint(filterRegistry, httpClientFactory);
             var actualContent = await sut.DispatchRequest(request, timeout);
 
             // Assert
@@ -140,7 +140,7 @@ namespace NPoint.Tests.Transport
             filterRegistry.Filters.Returns(new List<Func<IRequestFilter>> { () => new CustomRequestFilter(customHeader, customValue) });
 
             // Act
-            var sut = new HttpRequestDispatcher(filterRegistry, httpClientFactory);
+            var sut = new Endpoint(filterRegistry, httpClientFactory);
             var actualContent = await sut.DispatchRequest(request, timeout);
 
             // Assert

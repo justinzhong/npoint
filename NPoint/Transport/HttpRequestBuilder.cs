@@ -7,6 +7,7 @@ using System.Text;
 
 namespace NPoint.Transport
 {
+    // TODO: Make this class immutable
     public class HttpRequestBuilder : IHttpRequestBuilder
     {
         private IUriQueryAppender QueryAppender { get; }
@@ -76,6 +77,15 @@ namespace NPoint.Transport
             if (url == null) throw new ArgumentNullException(nameof(url));
 
             Request.RequestUri = url;
+
+            return this;
+        }
+
+        public HttpRequestBuilder SetHeaders(Action<HttpRequestHeaders> headersSpec)
+        {
+            if (headersSpec == null) throw new ArgumentNullException(nameof(headersSpec));
+
+            headersSpec(Request.Headers);
 
             return this;
         }

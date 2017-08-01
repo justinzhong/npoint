@@ -1,6 +1,4 @@
-using NPoint.Exceptions;
-using NPoint.Filters;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,29 +7,20 @@ namespace NPoint.Transport
 {
     public class HttpRequestDispatcher : IHttpRequestDispatcher
     {
-        private IRequestFilterRegistry FilterRegistry { get; }
         private IHttpClientFactory HttpClientFactory { get; }
 
-        public HttpRequestDispatcher(IHttpClientFactory httpClientFactory) : this(new DefaultFilterRegistry(), httpClientFactory) { }
-
-        public HttpRequestDispatcher(IRequestFilterRegistry filterRegistry, IHttpClientFactory httpClientFactory)
+        public HttpRequestDispatcher(IHttpClientFactory httpClientFactory)
         {
-            if (filterRegistry == null) throw new ArgumentNullException(nameof(filterRegistry));
             if (httpClientFactory == null) throw new ArgumentNullException(nameof(httpClientFactory));
 
-            FilterRegistry = filterRegistry;
             HttpClientFactory = httpClientFactory;
         }
 
-        public async Task<string> DispatchRequest(HttpRequestMessage request, int timeout)
+        public async Task<HttpResponseMessage> Dispatch(HttpRequestMessage request, int timeout)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
+            if (timeout < 0) throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout must be a non-negative value");
 
-            if (timeout <= 0) throw new ArgumentOutOfRangeException("Timeout must be a positive value", nameof(timeout));
-
-            ApplyFilers(request);
-
-            var response = string.Empty;
             var cancellationSource = new CancellationTokenSource();
 
             try
@@ -39,42 +28,21 @@ namespace NPoint.Transport
                 using (var client = HttpClientFactory.Create())
                 {
                     client.Timeout = TimeSpan.FromSeconds(timeout);
+                    var response = await client.SendAsync(request, cancellationSource.Token);
 
-                    var responseString = await ReadResponse(client, request, cancellationSource.Token);
-
-                    return responseString;
+                    return response;
                 }
             }
             catch (TaskCanceledException ex)
             {
-                if (ex.CancellationToken == cancellationSource.Token)
-                {
-                    throw;
-                }
+                if (ex.CancellationToken == cancellationSource.Token) throw;
 
-                throw new NetworkTimeoutException(request, timeout);
+                var timeOutException = new TimeoutException();
+                timeOutException.Data.Add(nameof(request), request);
+                timeOutException.Data.Add(nameof(timeout), timeout);
+
+                throw timeOutException;
             }
-        }
-
-        private void ApplyFilers(HttpRequestMessage request)
-        {
-            FilterRegistry.Filters.ForEach(filter => filter().Filter(request));
-        }
-
-        private async Task<string> ReadResponse(HttpClient client, HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            HttpResponseMessage response = await client.SendAsync(request, cancellationToken);
-
-            // TODO: replace this section with IResponseValidator extension point
-            // where the default behaviour is any non-OK status yields a ServerErrorException
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                throw new ServerErrorException(request, response);
-            }
-
-            var responseString = await response.Content.ReadAsStringAsync();
-
-            return responseString;
         }
     }
 }

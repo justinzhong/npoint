@@ -1,4 +1,3 @@
-using System;
 using NPoint.Serialization;
 
 namespace NPoint.Transport
@@ -8,11 +7,10 @@ namespace NPoint.Transport
         private IUriQueryAppender QueryAppender { get; }
         private IJsonSerializer Serializer { get; }
 
+        public HttpRequestBuilderFactory() : this(new UriQueryAppender(), new JsonNetJsonSerializer()) { }
+
         public HttpRequestBuilderFactory(IUriQueryAppender queryAppender, IJsonSerializer serializer)
         {
-            if (queryAppender == null) throw new ArgumentNullException(nameof(queryAppender));
-            if (serializer == null) throw new ArgumentNullException(nameof(serializer));
-
             QueryAppender = queryAppender;
             Serializer = serializer;
         }

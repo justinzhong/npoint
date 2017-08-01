@@ -5,6 +5,6 @@ namespace NPoint.Transport
 {
     public interface IHttpRequestDispatcher
     {
-        Task<string> DispatchRequest(HttpRequestMessage request, int timeout);
+        Task<HttpResponseMessage> Dispatch(HttpRequestMessage request, int timeout);
     }
 }
