@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using NPoint.Transport;
+﻿using NPoint.Transport;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
@@ -16,36 +15,34 @@ namespace NPoint.Tests
             [Theory, NPointData(true)]
             public async Task ShouldPerformRequestSpecs(IHttpRequestBuilderFactory requestBuilderFactory,
                 IHttpRequestDispatcher requestDispatcher,
+                IHttpRequestBuilder requestBuilder,
                 EndpointParameter parameter,
                 Uri expectedUri,
                 HttpContent expectedContent,
+                HttpRequestMessage expectedRequest,
                 HttpResponseMessage expectedResponse)
             {
                 // Arrange
                 var expectedBody = expectedContent.ReadAsStringAsync().Result;
                 var expectedContentType = expectedContent.Headers.ContentType.MediaType;
-                var actualRequest = default(HttpRequestMessage);
 
+                
                 parameter.RequestSpecs = new List<Action<IHttpRequestBuilder>>
                 {
                     { builder => builder.SetEndpoint(expectedUri) },
                     { builder => builder.SetBody(expectedBody, expectedContentType) }
                 };
-                requestDispatcher.Dispatch(Arg.Do<HttpRequestMessage>(request => actualRequest = request), parameter.Timeout)
-                    .Returns(Task.FromResult(expectedResponse));
+                requestBuilder.Build().Returns(expectedRequest);
+                requestBuilderFactory.Create().Returns(requestBuilder);
+                requestDispatcher.Dispatch(expectedRequest, parameter.Timeout).Returns(Task.FromResult(expectedResponse));
 
                 // Act
                 var sut = new Endpoint(requestBuilderFactory, requestDispatcher, parameter);
-                var response = await sut.Call();
+                await sut.Call();
 
                 // Assert
-                var actualBody = actualRequest.Content.ReadAsStringAsync().Result;
-                var actualContentType = actualRequest.Content.Headers.ContentType.MediaType;
-
-                actualRequest.RequestUri.ShouldBeEquivalentTo(expectedUri);
-                actualBody.ShouldBeEquivalentTo(expectedBody);
-                actualContentType.ShouldBeEquivalentTo(expectedContentType);
-                response.ShouldBeEquivalentTo(expectedResponse);
+                requestBuilder.Received(1).SetEndpoint(Arg.Is(expectedUri));
+                requestBuilder.Received(1).SetBody(Arg.Is(expectedBody), Arg.Is(expectedContentType));
             }
         }
     }
