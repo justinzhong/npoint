@@ -62,9 +62,6 @@
     <Compile Include="Transport\IHttpRequestDispatcher.cs" />
     <Compile Include="Transport\IUriQueryAppender.cs" />
     <Compile Include="Transport\UriQueryAppender.cs" />
-    <Compile Include="Validators\IValidator.cs" />
-    <Compile Include="Validators\IValidatorRegistry.cs" />
-    <Compile Include="Validators\DisabledValidatorRegistry.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
