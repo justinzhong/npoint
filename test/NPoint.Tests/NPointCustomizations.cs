@@ -12,7 +12,9 @@ namespace NPoint.Tests
 
         private static IEnumerable<ICustomization> AssembleCustomizations(bool mockable)
         {
-            yield return new HttpMessageRequestCustomization();
+            yield return new HttpContentBuilderCustomization();
+
+            yield return new EndpointParameterCustomization();
 
             if (mockable) yield return new AutoNSubstituteCustomization();
         }
