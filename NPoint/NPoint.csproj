@@ -46,22 +46,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Endpoint.cs" />
-    <Compile Include="Endpoint2%27TResponse.cs" />
     <Compile Include="EndpointParameter.cs" />
     <Compile Include="Exceptions\ServerErrorException.cs" />
-    <Compile Include="Filters\DefaultFilterRegistry.cs" />
-    <Compile Include="Filters\IRequestFilter.cs" />
-    <Compile Include="Filters\IRequestFilterRegistry.cs" />
     <Compile Include="IEndpoint.cs" />
-    <Compile Include="Parsers\ResponseParser.cs" />
-    <Compile Include="Parsers\IResponseParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\IJsonSerializer.cs" />
     <Compile Include="Serialization\JsonNetJsonSerializer.cs" />
     <Compile Include="Transport\HttpClientFactory.cs" />
     <Compile Include="Transport\HttpRequestBuilder.cs" />
     <Compile Include="Transport\HttpRequestBuilderFactory.cs" />
-    <Compile Include="Endpoint2.cs" />
     <Compile Include="Transport\HttpRequestDispatcher.cs" />
     <Compile Include="Transport\IHttpClientFactory.cs" />
     <Compile Include="Transport\IHttpRequestBuilder.cs" />

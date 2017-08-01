@@ -12,7 +12,7 @@ namespace NPoint.Transport
     {
         private IUriQueryAppender QueryAppender { get; }
         private IJsonSerializer Serializer { get; }
-        public HttpRequestMessage Request { get; }
+        public HttpRequestMessage Request { get; private set; }
 
         public HttpRequestBuilder(IUriQueryAppender queryAppender, IJsonSerializer serializer)
         {
@@ -106,6 +106,15 @@ namespace NPoint.Transport
             var body = Serializer.Serialize(payload);
 
             SetBody(body, contentType);
+
+            return this;
+        }
+
+        public HttpRequestBuilder SetRequest(HttpRequestMessage request)
+        {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+
+            Request = request;
 
             return this;
         }

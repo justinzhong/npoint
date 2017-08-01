@@ -18,5 +18,6 @@ namespace NPoint.Transport
         HttpRequestBuilder SetHeaders(Action<HttpRequestHeaders> headersSpec);
         HttpRequestBuilder SetHttpMethod(HttpMethod method);
         HttpRequestBuilder SetJson<TPayload>(TPayload payload, string contentType = "application/json");
+        HttpRequestBuilder SetRequest(HttpRequestMessage request);
     }
 }

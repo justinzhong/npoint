@@ -176,12 +176,7 @@ namespace NPoint
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
 
-            return PassOn(new EndpointParameter
-            {
-                Callback = Parameter.Callback,
-                Request = request,
-                Timeout = Parameter.Timeout
-            });
+            return AppendSpec(builder => builder.SetRequest(request));
         }
 
         public IEndpoint RequestWith(Action<IHttpRequestBuilder> requestSpec)
