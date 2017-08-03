@@ -1,5 +1,8 @@
 ﻿using FluentAssertions;
+using NPoint.Transport;
+using NSubstitute;
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -23,9 +26,31 @@ namespace NPoint.Tests
                 activity.ShouldThrowExactly<ArgumentNullException>().And.ParamName.ShouldBeEquivalentTo(nameof(converter));
             }
 
+            [Theory, NPointData(true)]
+            public async Task ShouldApplyConverter(
+                IHttpRequestBuilderFactory requestBuilderFactory,
+                IHttpRequestDispatcher requestDispatcher,
+                EndpointParameter parameter,
+                IHttpRequestBuilder requestBuilder,
+                HttpResponseMessage expectedResponse)
+            {
+                // Arrange
+                requestBuilderFactory.Create().Returns(requestBuilder);
+                requestDispatcher.Dispatch(Arg.Any<HttpRequestMessage>(), Arg.Any<int>()).Returns(Task.FromResult(expectedResponse));
+                Func<string, ResponseDto> converter = body => new ResponseDto { Body = body };
+
+                // Act
+                var sut = new Endpoint(requestBuilderFactory, requestDispatcher, parameter);
+                var response = await sut.Call(converter);
+
+                // Assert
+                var expectedResponseBody = expectedResponse.Content.ReadAsStringAsync().Result;
+                response.Body.ShouldBeEquivalentTo(expectedResponseBody);
+            }
+
             public class ResponseDto
             {
-                public string Name { get; set; }
+                public string Body { get; set; }
             }
         }
     }
