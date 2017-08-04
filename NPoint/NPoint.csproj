@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiClient.cs" />
+    <Compile Include="Config\DefaultApiConfig.cs" />
     <Compile Include="Endpoint.cs" />
     <Compile Include="EndpointFactory.cs" />
     <Compile Include="EndpointParameter.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\IJsonSerializer.cs" />
     <Compile Include="Serialization\JsonNetJsonSerializer.cs" />
+    <Compile Include="Serialization\JsonResponseConverter.cs" />
     <Compile Include="Transport\HttpClientFactory.cs" />
     <Compile Include="Transport\HttpRequestBuilder.cs" />
     <Compile Include="Transport\HttpRequestBuilderFactory.cs" />

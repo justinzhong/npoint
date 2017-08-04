@@ -9,6 +9,8 @@ namespace NPoint
         private IApiConfig Config { get; }
         private IEndpointFactory EndpointFactory { get; }
 
+        public ApiClient() : this(new DefaultApiConfig(), new EndpointFactory()) { }
+
         public ApiClient(IApiConfig config) : this(config, new EndpointFactory()) { }
 
         public ApiClient(IApiConfig config, IEndpointFactory endpointFactory)
