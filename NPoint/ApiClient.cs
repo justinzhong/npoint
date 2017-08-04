@@ -1,10 +1,10 @@
-﻿using NPoint.Filters;
+﻿using NPoint.Config;
 using System;
 using System.Threading.Tasks;
 
 namespace NPoint
 {
-    public class ApiClient
+    public class ApiClient : IApiClient
     {
         private IApiConfig Config { get; }
         private IEndpointFactory EndpointFactory { get; }

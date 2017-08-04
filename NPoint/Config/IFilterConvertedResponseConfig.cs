@@ -1,6 +1,6 @@
 using NPoint.Filters;
 
-namespace NPoint
+namespace NPoint.Config
 {
     public interface IFilterConvertedResponseConfig : IApiConfig
     {

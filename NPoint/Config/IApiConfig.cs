@@ -1,6 +1,6 @@
 using NPoint.Serialization;
 
-namespace NPoint
+namespace NPoint.Config
 {
     public interface IApiConfig
     {
