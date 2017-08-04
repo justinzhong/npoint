@@ -6,7 +6,6 @@ using System;
 
 namespace NPoint.Tests
 {
-
     public class HttpContentBuilder : ISpecimenBuilder
     {
         public object Create(object request, ISpecimenContext context)
@@ -14,7 +13,6 @@ namespace NPoint.Tests
             var type = request as Type;
 
             if (type == null) return new NoSpecimen();
-
             if (type != typeof(HttpContent)) return new NoSpecimen();
 
             var stringContent = new StringContent(context.Create<string>());

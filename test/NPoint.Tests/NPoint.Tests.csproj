@@ -91,7 +91,7 @@
     </Compile>
     <Compile Include="EndpointTest.cs" />
     <Compile Include="HttpContentBuilder.cs" />
-    <Compile Include="HttpContentBuilderCustomization.cs" />
+    <Compile Include="HttpRequestMessageCustomization.cs" />
     <Compile Include="NPointCustomizations.cs" />
     <Compile Include="NPointDataAttribute.cs" />
     <Compile Include="Exceptions\ServerErrorExceptionTest.cs" />

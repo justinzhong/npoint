@@ -18,37 +18,24 @@ namespace NPoint.Transport
         public HttpRequestBuilder() : this(new UriQueryAppender(), new JsonNetJsonSerializer()) { }
 
         public HttpRequestBuilder(IUriQueryAppender queryAppender, IJsonSerializer serializer) :
-            this(queryAppender, serializer, new List<Action<HttpRequestMessage>>())
+            this(queryAppender, serializer, new HttpRequestMessage(), new List<Action<HttpRequestMessage>>())
         { }
 
         public HttpRequestBuilder(
             IUriQueryAppender queryAppender,
             IJsonSerializer serializer,
+            HttpRequestMessage requestBaseline,
             IEnumerable<Action<HttpRequestMessage>> buildSpecs)
         {
             if (queryAppender == null) throw new ArgumentNullException(nameof(queryAppender));
             if (serializer == null) throw new ArgumentNullException(nameof(serializer));
+            if (requestBaseline == null) throw new ArgumentNullException(nameof(requestBaseline));
             if (buildSpecs == null) throw new ArgumentNullException(nameof(buildSpecs));
 
-            BuildSpecs = buildSpecs;
             QueryAppender = queryAppender;
-            RequestBaseline = new HttpRequestMessage();
             Serializer = serializer;
-        }
-
-        public HttpRequestBuilder(
-            IUriQueryAppender queryAppender,
-            IJsonSerializer serializer,
-            HttpRequestMessage requestBaseline)
-        {
-            if (queryAppender == null) throw new ArgumentNullException(nameof(queryAppender));
-            if (serializer == null) throw new ArgumentNullException(nameof(serializer));
-            if (requestBaseline == null) throw new ArgumentNullException(nameof(requestBaseline));
-
-            BuildSpecs = new List<Action<HttpRequestMessage>>();
-            QueryAppender = queryAppender;
             RequestBaseline = requestBaseline;
-            Serializer = serializer;
+            BuildSpecs = buildSpecs;
         }
 
         public HttpRequestBuilder AddQuery(string name, string value)
@@ -124,7 +111,7 @@ namespace NPoint.Transport
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
 
-            return new HttpRequestBuilder(QueryAppender, Serializer, request);
+            return new HttpRequestBuilder(QueryAppender, Serializer, request, BuildSpecs);
         }
 
         private HttpRequestBuilder AppendSpec(Action<HttpRequestMessage> spec)
@@ -134,7 +121,7 @@ namespace NPoint.Transport
             var specs = new List<Action<HttpRequestMessage>>(BuildSpecs);
             specs.Add(spec);
 
-            return new HttpRequestBuilder(QueryAppender, Serializer, specs);
+            return new HttpRequestBuilder(QueryAppender, Serializer, RequestBaseline, specs);
         }
 
         private HttpContent BuildMessageContent(string body, string contentType)

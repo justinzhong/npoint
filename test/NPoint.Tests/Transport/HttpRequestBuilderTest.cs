@@ -7,6 +7,7 @@ using System;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using Xunit;
 
@@ -121,7 +122,7 @@ namespace NPoint.Tests.Transport
             actual.Method.ShouldBeEquivalentTo(expectedHttpMethod);
         }
 
-        [Theory, AutoNSubstituteData]
+        [Theory, NPointData(true)]
         public void ShouldSetJsonWithDefaultContentMimeType(IUriQueryAppender queryAppender, IJsonSerializer serializer)
         {
             // Arrange
@@ -140,6 +141,71 @@ namespace NPoint.Tests.Transport
             actual.Content.ReadAsStringAsync().Result.Should().Be(expectedContentBody);
             actual.Content.Headers.ContentType.MediaType.Should().Be(expectedContentType);
             actual.Method.ShouldBeEquivalentTo(expectedHttpMethod);
+        }
+
+        [Theory, NPointData(true)]
+        public void ShouldSetRequest(IUriQueryAppender queryAppender, IJsonSerializer serializer, HttpRequestMessage request)
+        {
+            // Arrange
+            var expectedContentBody = "{ }";
+            var payloadObject = new CustomResponseModel();
+            serializer.Serialize(payloadObject).Returns(expectedContentBody);
+
+            // Act
+            var sut = new HttpRequestBuilder(queryAppender, serializer)
+                .SetRequest(request);
+            var actual = sut.Build();
+
+            // Assert
+            actual.ShouldBeEquivalentTo(request);
+        }
+
+        [Theory, NPointData(true)]
+        public void ShouldBuildUponRequest(IUriQueryAppender queryAppender, IJsonSerializer serializer, HttpRequestMessage request)
+        {
+            // Arrange
+            var expectedContentBody = "{ }";
+            var payloadObject = new CustomResponseModel();
+            var accept = "application/json";
+            serializer.Serialize(payloadObject).Returns(expectedContentBody);
+
+            // Act
+            var sut = new HttpRequestBuilder(queryAppender, serializer)
+                .SetRequest(request)
+                .SetAccept(accept)
+                .SetJson(payloadObject);
+            var actual = sut.Build();
+
+            // Assert
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(accept));
+            request.Content = new StringContent(expectedContentBody);
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            request.Content.Headers.ContentType.CharSet = "utf8";
+            actual.ShouldBeEquivalentTo(request);
+        }
+
+        [Theory, NPointData(true)]
+        public void ShouldBuildUponRequestReverseOrder(IUriQueryAppender queryAppender, IJsonSerializer serializer, HttpRequestMessage request)
+        {
+            // Arrange
+            var expectedContentBody = "{ }";
+            var payloadObject = new CustomResponseModel();
+            var accept = "application/json";
+            serializer.Serialize(payloadObject).Returns(expectedContentBody);
+
+            // Act
+            var sut = new HttpRequestBuilder(queryAppender, serializer)
+                .SetAccept(accept)
+                .SetJson(payloadObject)
+                .SetRequest(request);
+            var actual = sut.Build();
+
+            // Assert
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(accept));
+            request.Content = new StringContent(expectedContentBody);
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            request.Content.Headers.ContentType.CharSet = "utf8";
+            actual.ShouldBeEquivalentTo(request);
         }
     }
 }
