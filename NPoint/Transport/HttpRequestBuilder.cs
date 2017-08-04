@@ -15,6 +15,8 @@ namespace NPoint.Transport
         private IJsonSerializer Serializer { get; }
         private HttpRequestMessage RequestBaseline { get; }
 
+        public HttpRequestBuilder() : this(new UriQueryAppender(), new JsonNetJsonSerializer()) { }
+
         public HttpRequestBuilder(IUriQueryAppender queryAppender, IJsonSerializer serializer) :
             this(queryAppender, serializer, new List<Action<HttpRequestMessage>>())
         { }
@@ -54,7 +56,7 @@ namespace NPoint.Transport
             if (string.IsNullOrEmpty(name)) throw new ArgumentException("String cannot be null or empty", nameof(name));
             if (string.IsNullOrEmpty(value)) throw new ArgumentException("String cannot be null or empty", nameof(value));
 
-            return AppendSpec(request => request.RequestUri = QueryAppender.AppendQuery(request.RequestUri, name, value));
+            return AddQuery(new NameValueCollection { { name, value } });
         }
 
         public HttpRequestBuilder AddQuery(NameValueCollection nameValues)

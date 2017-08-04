@@ -3,9 +3,9 @@ using NPoint.Serialization;
 using NPoint.Tests.Data;
 using NPoint.Transport;
 using NSubstitute;
-using Ploeh.AutoFixture;
 using System;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using Xunit;
@@ -30,54 +30,51 @@ namespace NPoint.Tests.Transport
             activity.ShouldThrowExactly<ArgumentNullException>().And.ParamName.Should().Be(argName);
         }
 
-        [Theory]
-        [AutoNSubstituteData]
-        public void ShouldThrowInvalidOperationWhenAddingQueryWithoutSettingEndpointFirst(IUriQueryAppender queryAppender, IJsonSerializer serializer)
+        [Theory, NPointData(true)]
+        public void ShouldBuildRequestWithCustomHeaders(
+            IUriQueryAppender queryAppender, 
+            IJsonSerializer serializer)
         {
             // Arrange
-            var fixture = new Fixture();
-            var name = fixture.Create<string>();
-            var value = fixture.Create<string>();
+            var customHeaders = new NameValueCollection
+            {
+                { "X-Param1", "Value1" },
+                { "X-Param2", "Value2" },
+                { "X-Param3", "Value3" },
+                { "X-Param4", "Value4" },
+                { "X-Param5", "Value5" },
+            };
 
             // Act
-            var sut = new HttpRequestBuilder(queryAppender, serializer);
-            Action activity = () => sut.AddQuery(name, value);
+            var sut = new HttpRequestBuilder(queryAppender, serializer)
+                .SetHeaders(header =>
+                {
+                    foreach (var key in customHeaders.AllKeys) header.Add(key, customHeaders[key]);
+                });
+            var actual = sut.Build();
 
             // Assert
-            activity.ShouldThrowExactly<InvalidOperationException>().WithMessage("Request URI is null, call SetEndpoint first");
+            foreach (var kv in actual.Headers)
+            {
+                customHeaders.AllKeys.Should().Contain(kv.Key);
+                customHeaders[kv.Key].ShouldBeEquivalentTo(kv.Value.First());
+            }
         }
 
-        [Theory]
-        [AutoNSubstituteData]
-        public void ShouldThrowInvalidOperationWhenAddingBulkQueryWithoutSettingEndpointFirst(IUriQueryAppender queryAppender, IJsonSerializer serializer)
+        [Theory, NPointData(true)]
+        public void ShouldBuildRequestMessageWithAllData(
+            IUriQueryAppender queryAppender, 
+            IJsonSerializer serializer,
+            HttpRequestMessage request,
+            Uri seedRequestUri,
+            string expectedContentBody,
+            string queryName,
+            string queryValue)
         {
             // Arrange
-            var fixture = new Fixture();
-            var nameValues = fixture.Create<NameValueCollection>();
-
-            // Act
-            var sut = new HttpRequestBuilder(queryAppender, serializer);
-            Action activity = () => sut.AddQuery(nameValues);
-
-            // Assert
-            activity.ShouldThrowExactly<InvalidOperationException>().WithMessage("Request URI is null, call SetEndpoint first");
-        }
-
-        [Theory]
-        [AutoNSubstituteData]
-        public void ShouldBuildRequestMessageWithAllData(IUriQueryAppender queryAppender, IJsonSerializer serializer)
-        {
-            // Arrange
-            var fixture = new Fixture();
-            fixture.Customize(new NPointCustomizations());
-            var request = fixture.Create<HttpRequestMessage>();
-            var seedRequestUri = fixture.Create<Uri>();
             var expectedAccept = "application/octet-stream";
-            var expectedContentBody = fixture.Create<string>();
             var expectedContentType = "application/json";
             var expectedHttpMethod = HttpMethod.Options;
-            var queryName = fixture.Create<string>();
-            var queryValue = fixture.Create<string>();
             var queryParams = new NameValueCollection
             {
                 { "Param1", "Value1" },
@@ -103,18 +100,18 @@ namespace NPoint.Tests.Transport
             if (expectedRequestUri.Uri.IsDefaultPort) expectedRequestUri.Port = -1;
 
             var firstPassUri = new Uri($"{seedRequestUri.ToString()}&{queryName}={queryValue}");
-            queryAppender.AppendQuery(seedRequestUri, queryName, queryValue).Returns(firstPassUri);
+            queryAppender.AppendQuery(seedRequestUri, Arg.Any<NameValueCollection>()).Returns(firstPassUri);
             queryAppender.AppendQuery(firstPassUri, queryParams).Returns(expectedRequestUri.Uri);
 
             // Act
-            var sut = new HttpRequestBuilder(queryAppender, serializer);
-            sut.SetEndpoint(seedRequestUri);
-            sut.SetAccept(expectedAccept);
-            sut.SetBody(expectedContentBody, expectedContentType);
-            sut.SetHttpMethod(expectedHttpMethod);
-            sut.AddQuery(queryName, queryValue);
-            sut.AddQuery(queryParams);
-            var actual = sut.Request;
+            var sut = new HttpRequestBuilder(queryAppender, serializer)
+                .SetEndpoint(seedRequestUri)
+                .SetAccept(expectedAccept)
+                .SetBody(expectedContentBody, expectedContentType)
+                .SetHttpMethod(expectedHttpMethod)
+                .AddQuery(queryName, queryValue)
+                .AddQuery(queryParams);
+            var actual = sut.Build();
 
             // Assert
             actual.RequestUri.Should().Be(expectedRequestUri.Uri);
@@ -135,30 +132,9 @@ namespace NPoint.Tests.Transport
             var expectedHttpMethod = HttpMethod.Get;
 
             // Act
-            var sut = new HttpRequestBuilder(queryAppender, serializer);
-            sut.SetJson(payloadObject);
-            var actual = sut.Request;
-
-            // Assert
-            actual.Content.ReadAsStringAsync().Result.Should().Be(expectedContentBody);
-            actual.Content.Headers.ContentType.MediaType.Should().Be(expectedContentType);
-            actual.Method.ShouldBeEquivalentTo(expectedHttpMethod);
-        }
-
-        [Theory, AutoNSubstituteData]
-        public void ShouldSetJsonWithJsonpContentMimeType(IUriQueryAppender queryAppender, IJsonSerializer serializer)
-        {
-            // Arrange
-            var expectedContentBody = "{ }";
-            var payloadObject = new CustomResponseModel();
-            serializer.Serialize(payloadObject).Returns(expectedContentBody);
-            var expectedContentType = "application/jsonp";
-            var expectedHttpMethod = HttpMethod.Get;
-
-            // Act
-            var sut = new HttpRequestBuilder(queryAppender, serializer);
-            sut.SetJson(payloadObject, expectedContentType);
-            var actual = sut.Request;
+            var sut = new HttpRequestBuilder(queryAppender, serializer)
+                .SetJson(payloadObject);
+            var actual = sut.Build();
 
             // Assert
             actual.Content.ReadAsStringAsync().Result.Should().Be(expectedContentBody);

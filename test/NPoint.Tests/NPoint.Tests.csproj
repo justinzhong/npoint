@@ -100,6 +100,7 @@
     <Compile Include="Serialization\JsonResponseConverterTest.cs" />
     <Compile Include="Serialization\JsonNetJsonSerializerTest.cs" />
     <Compile Include="Transport\HttpClientFactoryTest.cs" />
+    <Compile Include="Transport\HttpRequestBuilderTest.cs" />
     <Compile Include="Transport\UriQueryAppenderTest.cs" />
   </ItemGroup>
   <ItemGroup>
