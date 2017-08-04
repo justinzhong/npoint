@@ -97,6 +97,7 @@
     <Compile Include="Exceptions\ServerErrorExceptionTest.cs" />
     <Compile Include="Data\CustomResponseModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\JsonResponseConverterTest.cs" />
     <Compile Include="Serialization\JsonNetJsonSerializerTest.cs" />
     <Compile Include="Transport\HttpClientFactoryTest.cs" />
     <Compile Include="Transport\UriQueryAppenderTest.cs" />

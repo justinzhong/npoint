@@ -12,11 +12,11 @@ namespace NPoint.Serialization
 
         public JsonResponseConverter() : this(new JsonNetJsonSerializer()) { }
 
-        public JsonResponseConverter(IJsonSerializer jsonSerializer)
+        public JsonResponseConverter(IJsonSerializer serializer)
         {
-            if (jsonSerializer == null) throw new ArgumentNullException(nameof(jsonSerializer));
+            if (serializer == null) throw new ArgumentNullException(nameof(serializer));
 
-            Serializer = jsonSerializer;
+            Serializer = serializer;
         }
 
         public async Task<TResponse> Convert<TResponse>(HttpResponseMessage response) where TResponse : class
