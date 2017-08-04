@@ -9,13 +9,11 @@ namespace NPoint
 {
     public class Endpoint : IEndpoint
     {
-        public static readonly int DefaultTimeout = 60;
-
         private IHttpRequestBuilderFactory RequestBuilderFactory { get; }
         private IHttpRequestDispatcher RequestDispatcher { get; }
         private EndpointParameter Parameter { get; }
 
-        public Endpoint() : this(new HttpRequestBuilderFactory(), new HttpRequestDispatcher(), new EndpointParameter { Timeout = DefaultTimeout }) { }
+        public Endpoint() : this(new HttpRequestBuilderFactory(), new HttpRequestDispatcher(), new EndpointParameter()) { }
 
         public Endpoint(IHttpRequestBuilderFactory requestBuilderFactory, IHttpRequestDispatcher requestDispatcher, EndpointParameter parameter)
         {
@@ -166,7 +164,7 @@ namespace NPoint
 
             return PassOn(new EndpointParameter
             {
-                Callback = callback,
+                OnResponseReceived = callback,
                 RequestSpecs = Parameter.RequestSpecs,
                 Timeout = Parameter.Timeout
             });
@@ -192,7 +190,7 @@ namespace NPoint
 
             return PassOn(new EndpointParameter
             {
-                Callback = Parameter.Callback,
+                OnResponseReceived = Parameter.OnResponseReceived,
                 RequestSpecs = Parameter.RequestSpecs,
                 Timeout = timeout
             });
@@ -205,7 +203,7 @@ namespace NPoint
 
             return PassOn(new EndpointParameter
             {
-                Callback = Parameter.Callback,
+                OnResponseReceived = Parameter.OnResponseReceived,
                 RequestSpecs = appendedSpecs,
                 Timeout = Parameter.Timeout
             });
@@ -229,7 +227,7 @@ namespace NPoint
 
         private async Task<string> ReadResponse(HttpResponseMessage response)
         {
-            Parameter.Callback?.Invoke(response);
+            Parameter.OnResponseReceived?.Invoke(response);
 
             var responseString = await response.Content.ReadAsStringAsync();
 

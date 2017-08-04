@@ -59,7 +59,7 @@ namespace NPoint.Tests
                 var callbackArg = default(HttpResponseMessage);
                 Action<HttpResponseMessage> expectedCallback = response => callbackArg = response;
 
-                parameter.Callback = expectedCallback;
+                parameter.OnResponseReceived = expectedCallback;
                 parameter.RequestSpecs = new List<Action<IHttpRequestBuilder>>();
                 requestBuilder.Build().Returns(expectedRequest);
                 requestBuilderFactory.Create().Returns(requestBuilder);

@@ -7,10 +7,21 @@ namespace NPoint
 {
     public class EndpointParameter
     {
-        public Action<HttpResponseMessage> Callback { get; set; }
+        public static readonly int DefaultTimeout = 60;
+
+        public Action<HttpRequestMessage> OnRequestReady { get; set; }
+
+        public Action<HttpResponseMessage> OnResponseReceived { get; set; }
+
+        public Action<object> OnResponseConverted { get; set; }
 
         public IEnumerable<Action<IHttpRequestBuilder>> RequestSpecs { get; set; }
 
         public int Timeout { get; set; }
+
+        public EndpointParameter()
+        {
+            Timeout = DefaultTimeout;
+        }
     }
 }
