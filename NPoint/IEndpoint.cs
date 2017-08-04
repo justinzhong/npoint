@@ -10,7 +10,7 @@ namespace NPoint
     {
         Task<string> Call();
 
-        Task<TResponse> Call<TResponse>(Func<string, TResponse> converter) where TResponse : class;
+        Task<TResponse> Call<TResponse>(Func<HttpResponseMessage, TResponse> converter) where TResponse : class;
 
         IEndpoint Delete(Uri url);
 

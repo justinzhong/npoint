@@ -34,14 +34,14 @@ namespace NPoint
             return responseBody;
         }
 
-        public async Task<TResponse> Call<TResponse>(Func<string, TResponse> converter)
+        public async Task<TResponse> Call<TResponse>(Func<HttpResponseMessage, TResponse> converter)
             where TResponse : class
         {
             if (converter == null) throw new ArgumentNullException(nameof(converter));
 
-            var responseBody = await Call();
+            var response = await RequestDispatcher.Dispatch(BuildRequest(Parameter.RequestSpecs), Parameter.Timeout);
 
-            return converter(responseBody);
+            return converter(response);
         }
 
         public IEndpoint Delete(Uri url)
