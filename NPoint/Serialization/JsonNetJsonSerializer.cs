@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using System;
 
 namespace NPoint.Serialization
 {
@@ -6,6 +7,8 @@ namespace NPoint.Serialization
     {
         public T Deserialize<T>(string json)
         {
+            if (string.IsNullOrEmpty(json)) throw new ArgumentException("String cannot be empty or null", nameof(json));
+
             return JsonConvert.DeserializeObject<T>(json);
         }
 
