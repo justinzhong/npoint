@@ -50,8 +50,8 @@
     <Compile Include="Endpoint.cs" />
     <Compile Include="EndpointFactory.cs" />
     <Compile Include="EndpointParameter.cs" />
-    <Compile Include="Exceptions\ServerErrorException.cs" />
     <Compile Include="Config\IApiConfig.cs" />
+    <Compile Include="Exceptions\NetworkTimeoutException.cs" />
     <Compile Include="IApiClient.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="Filters\IHttpRequestFilter.cs" />

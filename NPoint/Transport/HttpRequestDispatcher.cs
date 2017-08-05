@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPoint.Exceptions;
+using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,11 +40,7 @@ namespace NPoint.Transport
             {
                 if (ex.CancellationToken == cancellationSource.Token) throw;
 
-                var timeOutException = new TimeoutException();
-                timeOutException.Data.Add(nameof(request), request);
-                timeOutException.Data.Add(nameof(timeout), timeout);
-
-                throw timeOutException;
+                throw new NetworkTimeoutException(request, timeout);
             }
         }
     }

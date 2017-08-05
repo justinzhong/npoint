@@ -90,17 +90,18 @@
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>
     <Compile Include="EndpointTest.cs" />
+    <Compile Include="Exceptions\NetworkTimeoutExceptionTest.cs" />
     <Compile Include="HttpContentBuilder.cs" />
     <Compile Include="HttpRequestMessageCustomization.cs" />
     <Compile Include="NPointCustomizations.cs" />
     <Compile Include="NPointDataAttribute.cs" />
-    <Compile Include="Exceptions\ServerErrorExceptionTest.cs" />
     <Compile Include="Data\CustomResponseModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\JsonResponseConverterTest.cs" />
     <Compile Include="Serialization\JsonNetJsonSerializerTest.cs" />
     <Compile Include="Transport\HttpClientFactoryTest.cs" />
     <Compile Include="Transport\HttpRequestBuilderTest.cs" />
+    <Compile Include="Transport\HttpRequestDispatcherTest.cs" />
     <Compile Include="Transport\UriQueryAppenderTest.cs" />
   </ItemGroup>
   <ItemGroup>
