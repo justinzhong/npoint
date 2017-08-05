@@ -83,6 +83,7 @@
   <ItemGroup>
     <Compile Include="AutoNSubstituteDataAttribute.cs" />
     <Compile Include="EndpointParameterCustomization.cs" />
+    <Compile Include="EndpointParameterTest.cs" />
     <Compile Include="EndpointTest.Call%27String.cs">
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>

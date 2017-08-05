@@ -40,7 +40,7 @@ namespace NPoint
             if (converter == null) throw new ArgumentNullException(nameof(converter));
 
             var response = await RequestDispatcher.Dispatch(BuildRequest(Parameter.RequestSpecs), Parameter.Timeout);
-            var convertedResponse = await converter(response);
+            var convertedResponse = await ReadResponse(response, converter);
 
             return convertedResponse;
         }
@@ -230,9 +230,18 @@ namespace NPoint
         {
             Parameter.OnResponseReceived?.Invoke(response);
 
-            var responseString = await response.Content.ReadAsStringAsync();
+            var responseBody = await response.Content.ReadAsStringAsync();
 
-            return responseString;
+            return responseBody;
+        }
+
+        private async Task<TResponse> ReadResponse<TResponse>(HttpResponseMessage response, Func<HttpResponseMessage, Task<TResponse>> converter)
+        {
+            Parameter.OnResponseReceived?.Invoke(response);
+
+            var convertedResponse = await converter(response);
+
+            return convertedResponse;
         }
     }
 }

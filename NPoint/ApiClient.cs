@@ -28,7 +28,7 @@ namespace NPoint
             if (endpointSpec == null) throw new ArgumentNullException(nameof(endpointSpec));
 
             var endpoint = SetupEndpoint<TResponse>(endpointSpec);
-            var response = await endpoint.Call(r => Config.ResponseConverter.Convert<TResponse>(r));
+            var response = await endpoint.Call(request => Config.ResponseConverter.Convert<TResponse>(request));
 
             return response;
         }
