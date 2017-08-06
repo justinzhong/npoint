@@ -1,7 +1,4 @@
-﻿using NPoint.Transport;
-using Ploeh.AutoFixture;
-using System;
-using System.Collections.Generic;
+﻿using Ploeh.AutoFixture;
 
 namespace NPoint.Tests
 {
@@ -11,7 +8,6 @@ namespace NPoint.Tests
         {
             fixture.Customize<EndpointParameter>(composer =>
                 composer
-                    .With(parameter => parameter.RequestSpecs, new List<Action<IHttpRequestBuilder>>())
                     .With(parameter => parameter.Timeout, fixture.Create<int>()));
         }
     }

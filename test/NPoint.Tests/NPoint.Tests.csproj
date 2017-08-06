@@ -91,6 +91,9 @@
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>
     <Compile Include="EndpointTest.cs" />
+    <Compile Include="EndpointTest.Delete.cs">
+      <DependentUpon>EndpointTest.cs</DependentUpon>
+    </Compile>
     <Compile Include="Exceptions\NetworkTimeoutExceptionTest.cs" />
     <Compile Include="HttpContentBuilder.cs" />
     <Compile Include="HttpRequestMessageCustomization.cs" />

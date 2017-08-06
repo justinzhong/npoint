@@ -15,13 +15,25 @@ namespace NPoint
 
         public Action<object> OnResponseConverted { get; set; }
 
-        public IEnumerable<Action<IHttpRequestBuilder>> RequestSpecs { get; set; }
+        public List<Action<IHttpRequestBuilder>> RequestSpecs { get; }
 
         public int Timeout { get; set; }
 
         public EndpointParameter()
         {
+            RequestSpecs = new List<Action<IHttpRequestBuilder>>();
             Timeout = DefaultTimeout;
+        }
+
+        public EndpointParameter(EndpointParameter parameter)
+        {
+            if (parameter == null) throw new ArgumentNullException(nameof(parameter));
+
+            OnRequestReady = parameter.OnRequestReady;
+            OnResponseReceived = parameter.OnResponseReceived;
+            OnResponseConverted = parameter.OnResponseConverted;
+            RequestSpecs = parameter.RequestSpecs;
+            Timeout = parameter.Timeout;
         }
     }
 }

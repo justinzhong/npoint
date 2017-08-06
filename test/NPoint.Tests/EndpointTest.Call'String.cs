@@ -27,11 +27,11 @@ namespace NPoint.Tests
                 var expectedBody = expectedContent.ReadAsStringAsync().Result;
                 var expectedContentType = expectedContent.Headers.ContentType.MediaType;
 
-                parameter.RequestSpecs = new List<Action<IHttpRequestBuilder>>
+                parameter.RequestSpecs.AddRange(new List<Action<IHttpRequestBuilder>>
                 {
                     { builder => builder.SetEndpoint(expectedUri) },
                     { builder => builder.SetBody(expectedBody, expectedContentType) }
-                };
+                });
                 requestBuilder.Build().Returns(expectedRequest);
                 requestBuilderFactory.Create().Returns(requestBuilder);
                 requestDispatcher.Dispatch(expectedRequest, parameter.Timeout).Returns(Task.FromResult(expectedResponse));
@@ -60,7 +60,6 @@ namespace NPoint.Tests
                 Action<HttpResponseMessage> expectedCallback = response => callbackArg = response;
 
                 parameter.OnResponseReceived = expectedCallback;
-                parameter.RequestSpecs = new List<Action<IHttpRequestBuilder>>();
                 requestBuilder.Build().Returns(expectedRequest);
                 requestBuilderFactory.Create().Returns(requestBuilder);
                 requestDispatcher.Dispatch(expectedRequest, parameter.Timeout).Returns(Task.FromResult(expectedResponse));
@@ -84,7 +83,6 @@ namespace NPoint.Tests
                 HttpResponseMessage expectedResponse)
             {
                 // Arrange
-                parameter.RequestSpecs = new List<Action<IHttpRequestBuilder>>();
                 requestBuilder.Build().Returns(expectedRequest);
                 requestBuilderFactory.Create().Returns(requestBuilder);
                 requestDispatcher.Dispatch(expectedRequest, parameter.Timeout).Returns(Task.FromResult(expectedResponse));

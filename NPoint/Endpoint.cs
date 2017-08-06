@@ -1,8 +1,8 @@
-﻿using NPoint.Transport;
+﻿using System.Linq;
+using NPoint.Transport;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace NPoint
@@ -13,7 +13,9 @@ namespace NPoint
         private IHttpRequestDispatcher RequestDispatcher { get; }
         private EndpointParameter Parameter { get; }
 
-        public Endpoint() : this(new HttpRequestBuilderFactory(), new HttpRequestDispatcher(), new EndpointParameter()) { }
+        public Endpoint() : this(new HttpRequestBuilderFactory(), new HttpRequestDispatcher()) { }
+
+        public Endpoint(IHttpRequestBuilderFactory requestBuilderFactory, IHttpRequestDispatcher requestDispatcher) : this(requestBuilderFactory, requestDispatcher, new EndpointParameter()) { }
 
         public Endpoint(IHttpRequestBuilderFactory requestBuilderFactory, IHttpRequestDispatcher requestDispatcher, EndpointParameter parameter)
         {
@@ -28,7 +30,8 @@ namespace NPoint
 
         public async Task<string> Call()
         {
-            var response = await RequestDispatcher.Dispatch(BuildRequest(Parameter.RequestSpecs), Parameter.Timeout);
+            var request = BuildRequest(Parameter.RequestSpecs);
+            var response = await RequestDispatcher.Dispatch(request, Parameter.Timeout);
             var responseBody = await ReadResponse(response);
 
             return responseBody;
@@ -39,10 +42,19 @@ namespace NPoint
         {
             if (converter == null) throw new ArgumentNullException(nameof(converter));
 
-            var response = await RequestDispatcher.Dispatch(BuildRequest(Parameter.RequestSpecs), Parameter.Timeout);
+            var request = BuildRequest(Parameter.RequestSpecs);
+            var response = await RequestDispatcher.Dispatch(request, Parameter.Timeout);
             var convertedResponse = await ReadResponse(response, converter);
 
             return convertedResponse;
+        }
+
+        public async Task<HttpResponseMessage> CallThrough()
+        {
+            var request = BuildRequest(Parameter.RequestSpecs);
+            var response = await RequestDispatcher.Dispatch(request, Parameter.Timeout);
+
+            return response;
         }
 
         public IEndpoint Delete(Uri url)
@@ -53,15 +65,6 @@ namespace NPoint
                 .SetHttpMethod(HttpMethod.Delete));
         }
 
-        public IEndpoint Delete(Uri url, Action<HttpRequestHeaders> headersSpec)
-        {
-            if (headersSpec == null) throw new ArgumentNullException(nameof(headersSpec));
-
-            return AppendSpec(builder => builder.SetEndpoint(url)
-                .SetHttpMethod(HttpMethod.Delete)
-                .SetHeaders(headersSpec));
-        }
-
         public IEndpoint Get(Uri url)
         {
             if (url == null) throw new ArgumentNullException(nameof(url));
@@ -70,45 +73,12 @@ namespace NPoint
                 .SetHttpMethod(HttpMethod.Get));
         }
 
-        public IEndpoint Get(Uri url, Action<HttpRequestHeaders> headersSpec)
+        public IEndpoint Head(Uri url)
         {
             if (url == null) throw new ArgumentNullException(nameof(url));
-            if (headersSpec == null) throw new ArgumentNullException(nameof(headersSpec));
 
             return AppendSpec(builder => builder.SetEndpoint(url)
-                .SetHttpMethod(HttpMethod.Get)
-                .SetHeaders(headersSpec));
-        }
-
-        public async Task<HttpResponseMessage> Head(Uri url)
-        {
-            if (url == null) throw new ArgumentNullException(nameof(url));
-
-            var requestSpecs = new List<Action<IHttpRequestBuilder>>
-            {
-                builder => builder.SetEndpoint(url)
-                    .SetHttpMethod(HttpMethod.Head)
-            };
-            var request = BuildRequest(requestSpecs);
-            var response = await RequestDispatcher.Dispatch(request, Parameter.Timeout);
-
-            return response;
-        }
-
-        public async Task<HttpResponseMessage> Head(Uri url, Action<HttpRequestHeaders> headers)
-        {
-            if (url == null) throw new ArgumentNullException(nameof(url));
-
-            var requestSpecs = new List<Action<IHttpRequestBuilder>>
-            {
-                builder => builder.SetEndpoint(url)
-                    .SetHttpMethod(HttpMethod.Head)
-                    .SetHeaders(headers)
-            };
-            var request = BuildRequest(requestSpecs);
-            var response = await RequestDispatcher.Dispatch(request, Parameter.Timeout);
-
-            return response;
+                .SetHttpMethod(HttpMethod.Head));
         }
 
         public IEndpoint Post(Uri url, string body, string contentType)
@@ -122,19 +92,6 @@ namespace NPoint
                 .SetHttpMethod(HttpMethod.Post));
         }
 
-        public IEndpoint Post(Uri url, string body, string contentType, Action<HttpRequestHeaders> headersSpec)
-        {
-            if (url == null) throw new ArgumentNullException(nameof(url));
-            if (string.IsNullOrEmpty(body)) throw new ArgumentException("String cannot be empty or null", nameof(body));
-            if (string.IsNullOrEmpty(contentType)) throw new ArgumentException("String cannot be empty or null", nameof(contentType));
-            if (headersSpec == null) throw new ArgumentNullException(nameof(headersSpec));
-
-            return AppendSpec(builder => builder.SetEndpoint(url)
-                .SetBody(body, contentType)
-                .SetHttpMethod(HttpMethod.Post)
-                .SetHeaders(headersSpec));
-        }
-
         public IEndpoint Put(Uri url, string body, string contentType)
         {
             if (url == null) throw new ArgumentNullException(nameof(url));
@@ -146,28 +103,13 @@ namespace NPoint
                 .SetHttpMethod(HttpMethod.Put));
         }
 
-        public IEndpoint Put(Uri url, string body, string contentType, Action<HttpRequestHeaders> headersSpec)
-        {
-            if (url == null) throw new ArgumentNullException(nameof(url));
-            if (string.IsNullOrEmpty(body)) throw new ArgumentException("String cannot be empty or null", nameof(body));
-            if (string.IsNullOrEmpty(contentType)) throw new ArgumentException("String cannot be empty or null", nameof(contentType));
-            if (headersSpec == null) throw new ArgumentNullException(nameof(headersSpec));
-
-            return AppendSpec(builder => builder.SetEndpoint(url)
-                .SetBody(body, contentType)
-                .SetHttpMethod(HttpMethod.Put)
-                .SetHeaders(headersSpec));
-        }
-
         public IEndpoint OnReceived(Action<HttpResponseMessage> callback)
         {
             if (callback == null) throw new ArgumentNullException(nameof(callback));
 
-            return PassOn(new EndpointParameter
+            return PassOn(new EndpointParameter(Parameter)
             {
                 OnResponseReceived = callback,
-                RequestSpecs = Parameter.RequestSpecs,
-                Timeout = Parameter.Timeout
             });
         }
 
@@ -189,10 +131,8 @@ namespace NPoint
         {
             if (timeout < 0) throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout must be a non-negative value");
 
-            return PassOn(new EndpointParameter
+            return PassOn(new EndpointParameter(Parameter)
             {
-                OnResponseReceived = Parameter.OnResponseReceived,
-                RequestSpecs = Parameter.RequestSpecs,
                 Timeout = timeout
             });
         }
@@ -202,12 +142,10 @@ namespace NPoint
             var appendedSpecs = new List<Action<IHttpRequestBuilder>>(Parameter.RequestSpecs);
             appendedSpecs.Add(requestSpec);
 
-            return PassOn(new EndpointParameter
-            {
-                OnResponseReceived = Parameter.OnResponseReceived,
-                RequestSpecs = appendedSpecs,
-                Timeout = Parameter.Timeout
-            });
+            var parameter = new EndpointParameter(Parameter);
+            parameter.RequestSpecs.Add(requestSpec);
+
+            return PassOn(parameter);
         }
 
         private IEndpoint PassOn(EndpointParameter parameter)

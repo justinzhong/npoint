@@ -7,15 +7,15 @@ namespace NPoint.Transport
 {
     public interface IHttpRequestBuilder
     {
-        HttpRequestBuilder AddQuery(NameValueCollection nameValues);
-        HttpRequestBuilder AddQuery(string name, string value);
+        IHttpRequestBuilder AddQuery(NameValueCollection nameValues);
+        IHttpRequestBuilder AddQuery(string name, string value);
         HttpRequestMessage Build();
-        HttpRequestBuilder SetAccept(string accept);
-        HttpRequestBuilder SetBody(string body, string contentType);
-        HttpRequestBuilder SetEndpoint(Uri url);
-        HttpRequestBuilder SetHeaders(Action<HttpRequestHeaders> headersSpec);
-        HttpRequestBuilder SetHttpMethod(HttpMethod method);
-        HttpRequestBuilder SetJson<TPayload>(TPayload payload);
-        HttpRequestBuilder SetRequest(HttpRequestMessage request);
+        IHttpRequestBuilder SetAccept(string accept);
+        IHttpRequestBuilder SetBody(string body, string contentType);
+        IHttpRequestBuilder SetEndpoint(Uri url);
+        IHttpRequestBuilder SetHeaders(Action<HttpRequestHeaders> headersSpec);
+        IHttpRequestBuilder SetHttpMethod(HttpMethod method);
+        IHttpRequestBuilder SetJson<TPayload>(TPayload payload);
+        IHttpRequestBuilder SetRequest(HttpRequestMessage request);
     }
 }

@@ -38,7 +38,7 @@ namespace NPoint.Transport
             BuildSpecs = buildSpecs;
         }
 
-        public HttpRequestBuilder AddQuery(string name, string value)
+        public IHttpRequestBuilder AddQuery(string name, string value)
         {
             if (string.IsNullOrEmpty(name)) throw new ArgumentException("String cannot be null or empty", nameof(name));
             if (string.IsNullOrEmpty(value)) throw new ArgumentException("String cannot be null or empty", nameof(value));
@@ -46,7 +46,7 @@ namespace NPoint.Transport
             return AddQuery(new NameValueCollection { { name, value } });
         }
 
-        public HttpRequestBuilder AddQuery(NameValueCollection nameValues)
+        public IHttpRequestBuilder AddQuery(NameValueCollection nameValues)
         {
             if (nameValues == null) throw new ArgumentNullException(nameof(nameValues));
 
@@ -60,14 +60,14 @@ namespace NPoint.Transport
             return RequestBaseline;
         }
 
-        public HttpRequestBuilder SetAccept(string accept)
+        public IHttpRequestBuilder SetAccept(string accept)
         {
             if (string.IsNullOrEmpty(accept)) throw new ArgumentException("String cannot be null or empty", nameof(accept));
 
             return AppendSpec(request => request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(accept)));
         }
 
-        public HttpRequestBuilder SetBody(string body, string contentType)
+        public IHttpRequestBuilder SetBody(string body, string contentType)
         {
             if (string.IsNullOrEmpty(body)) throw new ArgumentException("String cannot be null or empty", nameof(body));
             if (string.IsNullOrEmpty(contentType)) throw new ArgumentException("String cannot be null or empty", nameof(contentType));
@@ -75,28 +75,28 @@ namespace NPoint.Transport
             return AppendSpec(request => request.Content = BuildMessageContent(body, contentType));
         }
 
-        public HttpRequestBuilder SetEndpoint(Uri url)
+        public IHttpRequestBuilder SetEndpoint(Uri url)
         {
             if (url == null) throw new ArgumentNullException(nameof(url));
 
             return AppendSpec(request => request.RequestUri = url);
         }
 
-        public HttpRequestBuilder SetHeaders(Action<HttpRequestHeaders> headersSpec)
+        public IHttpRequestBuilder SetHeaders(Action<HttpRequestHeaders> headersSpec)
         {
             if (headersSpec == null) throw new ArgumentNullException(nameof(headersSpec));
 
             return AppendSpec(request => headersSpec(request.Headers));
         }
 
-        public HttpRequestBuilder SetHttpMethod(HttpMethod method)
+        public IHttpRequestBuilder SetHttpMethod(HttpMethod method)
         {
             if (method == null) throw new ArgumentNullException(nameof(method));
 
             return AppendSpec(request => request.Method = method);
         }
 
-        public HttpRequestBuilder SetJson<TPayload>(TPayload payload)
+        public IHttpRequestBuilder SetJson<TPayload>(TPayload payload)
         {
             if (payload == null) throw new ArgumentNullException(nameof(payload));
 
@@ -107,14 +107,14 @@ namespace NPoint.Transport
             });
         }
 
-        public HttpRequestBuilder SetRequest(HttpRequestMessage request)
+        public IHttpRequestBuilder SetRequest(HttpRequestMessage request)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
 
             return new HttpRequestBuilder(QueryAppender, Serializer, request, BuildSpecs);
         }
 
-        private HttpRequestBuilder AppendSpec(Action<HttpRequestMessage> spec)
+        private IHttpRequestBuilder AppendSpec(Action<HttpRequestMessage> spec)
         {
             if (spec == null) throw new ArgumentNullException(nameof(spec));
 

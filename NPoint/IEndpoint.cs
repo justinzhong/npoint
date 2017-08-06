@@ -1,36 +1,31 @@
 using NPoint.Transport;
 using System;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace NPoint
 {
     public interface IEndpoint
     {
+        #region HTTP verb methods
+
+        IEndpoint Delete(Uri url);
+
+        IEndpoint Get(Uri url);
+
+        IEndpoint Head(Uri url);
+
+        IEndpoint Post(Uri url, string body, string contentType);
+
+        IEndpoint Put(Uri url, string body, string contentType);
+
+        #endregion
+
         Task<string> Call();
 
         Task<TResponse> Call<TResponse>(Func<HttpResponseMessage, Task<TResponse>> converter) where TResponse : class;
 
-        IEndpoint Delete(Uri url);
-
-        IEndpoint Delete(Uri url, Action<HttpRequestHeaders> headersSpec);
-
-        IEndpoint Get(Uri url);
-
-        IEndpoint Get(Uri url, Action<HttpRequestHeaders> headersSpec);
-
-        Task<HttpResponseMessage> Head(Uri url);
-
-        Task<HttpResponseMessage> Head(Uri url, Action<HttpRequestHeaders> headersSpec);
-
-        IEndpoint Post(Uri url, string body, string contentType);
-
-        IEndpoint Post(Uri url, string body, string contentType, Action<HttpRequestHeaders> headersSpec);
-
-        IEndpoint Put(Uri url, string body, string contentType);
-
-        IEndpoint Put(Uri url, string body, string contentType, Action<HttpRequestHeaders> headersSpec);
+        Task<HttpResponseMessage> CallThrough();
 
         IEndpoint OnReceived(Action<HttpResponseMessage> callback);
 
