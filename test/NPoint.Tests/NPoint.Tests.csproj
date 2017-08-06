@@ -94,6 +94,7 @@
     <Compile Include="EndpointTest.Delete.cs">
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>
+    <Compile Include="EndpointTest.Integration.cs" />
     <Compile Include="EndpointTest.TimeoutWhen.cs">
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>
