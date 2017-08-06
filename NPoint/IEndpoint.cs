@@ -1,6 +1,7 @@
 using NPoint.Transport;
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace NPoint
@@ -32,6 +33,8 @@ namespace NPoint
         IEndpoint RequestWith(HttpRequestMessage request);
 
         IEndpoint RequestWith(Action<IHttpRequestBuilder> requestSpec);
+
+        IEndpoint SetHeader(Action<HttpRequestHeaders> headerSpec);
 
         IEndpoint TimeoutWhen(int timeout);
     }

@@ -1,8 +1,8 @@
-﻿using System.Linq;
-using NPoint.Transport;
+﻿using NPoint.Transport;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace NPoint
@@ -125,6 +125,13 @@ namespace NPoint
             if (requestSpec == null) throw new ArgumentNullException(nameof(requestSpec));
 
             return AppendSpec(requestSpec);
+        }
+
+        public IEndpoint SetHeader(Action<HttpRequestHeaders> headerSpec)
+        {
+            if (headerSpec == null) throw new ArgumentNullException(nameof(headerSpec));
+
+            return AppendSpec(builder => builder.SetHeaders(headerSpec));
         }
 
         public IEndpoint TimeoutWhen(int timeout)
