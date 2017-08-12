@@ -1,7 +1,30 @@
-﻿namespace NPoint.Tests
+﻿using FluentAssertions;
+using NPoint.Transport;
+using System;
+using Xunit;
+
+namespace NPoint.Tests
 {
     public partial class EndpointTest
     {
+        [Theory]
+        [InlineData(false, false, true, "parameter")]
+        [InlineData(false, true, false, "requestDispatcher")]
+        [InlineData(true, false, false, "requestBuilderFactory")]
+        public void ShouldNotAcceptNullArgs(bool requestFactoryIsNull, bool requestDispatcherIsNull, bool parameterIsNull, string parameterName)
+        {
+            // Arrange
+            IHttpRequestBuilderFactory requestBuilderFactory = requestFactoryIsNull ? default(IHttpRequestBuilderFactory) : new HttpRequestBuilderFactory();
+            IHttpRequestDispatcher requestDispatcher = requestDispatcherIsNull ? default(IHttpRequestDispatcher) : new HttpRequestDispatcher();
+            EndpointParameter endpointParameter = parameterIsNull ? default(EndpointParameter) : new EndpointParameter();
+
+            // Act
+            Action activity = () => new Endpoint(requestBuilderFactory, requestDispatcher, endpointParameter);
+
+            // Assert
+            activity.ShouldThrowExactly<ArgumentNullException>().And.ParamName.ShouldBeEquivalentTo(parameterName);
+        }
+
         //[Theory, AutoNSubstituteData]
         //public async Task ShouldDispatchRequestOfStringType(INPointConfig config,
         //    IHttpRequestBuilderFactory requestBuilderFactory,

@@ -10,6 +10,19 @@ namespace NPoint.Tests
     public class EndpointParameterTest
     {
         [Fact]
+        public void ShouldNotAcceptNullEndpointParameter()
+        {
+            // Arrange
+            var endpointParameter = default(EndpointParameter);
+
+            // Act
+            Action activity = () => new EndpointParameter(endpointParameter);
+
+            // Assert
+            activity.ShouldThrowExactly<ArgumentNullException>().And.ParamName.ShouldBeEquivalentTo("parameter");
+        }
+
+        [Fact]
         public void ShouldInitialiseToDefaultTimeout()
         {
             // Arrange

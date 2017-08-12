@@ -95,6 +95,9 @@
     <Compile Include="EndpointTest.Delete.cs">
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>
+    <Compile Include="EndpointTest.Get.cs">
+      <DependentUpon>EndpointTest.cs</DependentUpon>
+    </Compile>
     <Compile Include="EndpointTest.Integration.cs">
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>
