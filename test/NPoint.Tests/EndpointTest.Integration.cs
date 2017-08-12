@@ -11,7 +11,7 @@ namespace NPoint.Tests
         public class Integration
         {
             [Fact]
-            public async Task ShouldReadResponseAfterEndpointCall()
+            public async Task ShouldRetrieveWebPageViaGet()
             {
                 // Arrange
                 var googleNewsUrl = new Uri("https://news.google.com/news/headlines?ned=us&hl=en");

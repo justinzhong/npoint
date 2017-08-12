@@ -48,6 +48,24 @@ namespace NPoint.Tests.Transport
             ShouldAppendNameAndValuesToQueryCore(seedUrlString, nameValues, expectedUrlString);
         }
 
+        [Theory, NPointData()]
+        public void ShouldAppendNameAndValue(Uri seedUrl, string name, string value)
+        {
+            // Arrange
+            var urlBuilder = new StringBuilder(seedUrl.ToString());
+            urlBuilder.Append("?");
+            urlBuilder.Append($"{Uri.EscapeDataString(name)}={Uri.EscapeDataString(value)}&");
+            urlBuilder.Length--;
+            var expected = urlBuilder.ToString();
+
+            // Act
+            var sut = new UriQueryAppender();
+            var actual = sut.AppendQuery(seedUrl, name, value);
+
+            // Assert
+            actual.ShouldBeEquivalentTo(expected);
+        }
+
         [Fact]
         public void ShouldAppendBulkNameAndValuesToQueryWithComplexUrl()
         {
@@ -72,6 +90,20 @@ namespace NPoint.Tests.Transport
 
             // Act & Assert
             ShouldAppendNameAndValuesToQueryCore(seedUrlString, nameValues, expectedUrlString);
+        }
+
+        [Theory, NPointData()]
+        public void ShouldReturnOriginalUrlWithEmptyNameValues(Uri seedUrl)
+        {
+            // Arrange
+            var nameValues = new NameValueCollection();
+
+            // Act
+            var sut = new UriQueryAppender();
+            var actual = sut.AppendQuery(seedUrl, nameValues);
+
+            // Assert
+            actual.ShouldBeEquivalentTo(seedUrl);
         }
 
         private void ShouldAppendNameAndValuesToQueryCore(string seedUrlString, NameValueCollection nameValues, string expectedUrlString)
@@ -125,6 +157,53 @@ namespace NPoint.Tests.Transport
             }
 
             if (!string.IsNullOrEmpty(existingFragments)) actualFragments.ShouldBeEquivalentTo(existingFragments);
+        }
+
+        public class ShouldThrowArgumentException
+        {
+            public class AddQueryWithString
+            {
+                [Theory]
+                [InlineData("http://example.com", "parameter", null, typeof(ArgumentException), "value")]
+                [InlineData("http://example.com", null, "value", typeof(ArgumentException), "name")]
+                [InlineData(null, "parameter", "value", typeof(ArgumentNullException), "url")]
+                public void ShouldThrowArgumentException(string urlString, string parameter, string value, Type exceptionType, string paramName)
+                {
+                    // Arrange
+                    var url = string.IsNullOrEmpty(urlString) ? default(Uri) : new Uri(urlString);
+
+                    // Act
+                    var sut = new UriQueryAppender();
+                    Action activity = () => sut.AppendQuery(url, parameter, value);
+
+                    // Assert
+                    var assertion = activity.ShouldThrow<ArgumentException>();
+                    assertion.And.Should().BeOfType(exceptionType);
+                    assertion.And.ParamName.ShouldBeEquivalentTo(paramName);
+                }
+            }
+
+            public class AddQueryWithNameValueCollection
+            {
+                [Theory]
+                [InlineData("http://example.com", true, typeof(ArgumentNullException), "nameValues")]
+                [InlineData(null, false, typeof(ArgumentNullException), "url")]
+                public void ShouldThrowArgumentException(string urlString, bool nameValuesIsNull, Type exceptionType, string paramName)
+                {
+                    // Arrange
+                    var url = string.IsNullOrEmpty(urlString) ? default(Uri) : new Uri(urlString);
+                    var nameValues = nameValuesIsNull ? default(NameValueCollection) : new NameValueCollection();
+
+                    // Act
+                    var sut = new UriQueryAppender();
+                    Action activity = () => sut.AppendQuery(url, nameValues);
+
+                    // Assert
+                    var assertion = activity.ShouldThrow<ArgumentException>();
+                    assertion.And.Should().BeOfType(exceptionType);
+                    assertion.And.ParamName.ShouldBeEquivalentTo(paramName);
+                }
+            }
         }
     }
 }

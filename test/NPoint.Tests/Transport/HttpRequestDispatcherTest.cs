@@ -28,6 +28,20 @@ namespace NPoint.Tests.Transport
             activity.ShouldThrowExactly<ArgumentNullException>().And.ParamName.ShouldBeEquivalentTo(nameof(httpClientFactory));
         }
 
+        [Theory, NPointData]
+        public void ShouldNotAllowNegativeTimeout(HttpRequestMessage request, int timeoutSeed)
+        {
+            // Arrange
+            var timeout = Math.Abs(timeoutSeed) * -1;
+
+            // Act
+            var sut = new HttpRequestDispatcher();
+            Func<Task<HttpResponseMessage>> activity = async () => await sut.Dispatch(request, timeout);
+
+            // Assert
+            activity.ShouldThrowExactly<ArgumentOutOfRangeException>().And.Message.Should().StartWith($"Timeout must be a non-negative value but received {timeout}");
+        }
+
         [Theory, NPointData(true)]
         public void ShouldThrowArgumentNullExceptionWhenRequestIsNull(IHttpClientFactory httpClientFactory)
         {

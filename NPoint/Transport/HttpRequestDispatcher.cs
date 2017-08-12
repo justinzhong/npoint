@@ -22,7 +22,7 @@ namespace NPoint.Transport
         public async Task<HttpResponseMessage> Dispatch(HttpRequestMessage request, int timeout)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
-            if (timeout < 0) throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout must be a non-negative value");
+            if (timeout < 0) throw new ArgumentOutOfRangeException(nameof(timeout), $"Timeout must be a non-negative value but received {timeout}");
 
             var cancellationSource = new CancellationTokenSource();
 
