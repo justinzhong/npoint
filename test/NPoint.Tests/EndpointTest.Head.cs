@@ -9,7 +9,7 @@ namespace NPoint.Tests
 {
     public partial class EndpointTest
     {
-        public class Get
+        public class Head
         {
             [Fact]
             public void ShouldNotAcceptNullUrl()
@@ -19,28 +19,28 @@ namespace NPoint.Tests
 
                 // Act
                 var sut = new Endpoint();
-                Action activity = () => sut.Get(url);
+                Action activity = () => sut.Head(url);
 
                 // Assert
                 activity.ShouldThrowExactly<ArgumentNullException>().And.ParamName.ShouldBeEquivalentTo(nameof(url));
             }
 
             [Theory, NPointData(true)]
-            public void ShouldSetEndpointAndHttpGetMethod(Uri url, 
-                IHttpRequestBuilder requestBuilder, 
-                IHttpRequestBuilderFactory requestBuilderFactory, 
+            public void ShouldSetEndpointAndHttpHeadMethod(Uri url,
+                IHttpRequestBuilder requestBuilder,
+                IHttpRequestBuilderFactory requestBuilderFactory,
                 IHttpRequestDispatcher requestDispatcher,
                 EndpointParameter parameter)
             {
                 // Arrange
-                var expected = HttpMethod.Get;
+                var expected = HttpMethod.Head;
                 requestBuilder.SetEndpoint(url).Returns(requestBuilder);
                 requestBuilder.SetHttpMethod(expected).Returns(requestBuilder);
                 requestBuilderFactory.Create().Returns(requestBuilder);
 
                 // Act
                 var sut = new Endpoint(requestBuilderFactory, requestDispatcher, parameter)
-                    .Get(url);
+                    .Head(url);
                 parameter.RequestSpecs.ForEach(spec => spec(requestBuilder));
 
                 // Assert

@@ -98,7 +98,17 @@
     <Compile Include="EndpointTest.Get.cs">
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>
+    <Compile Include="EndpointTest.Head.cs">
+      <DependentUpon>EndpointTest.cs</DependentUpon>
+    </Compile>
     <Compile Include="EndpointTest.Integration.cs">
+      <DependentUpon>EndpointTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EndpointTest.OnReceived.cs" />
+    <Compile Include="EndpointTest.Post.cs">
+      <DependentUpon>EndpointTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EndpointTest.Put.cs">
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>
     <Compile Include="EndpointTest.TimeoutWhen.cs">

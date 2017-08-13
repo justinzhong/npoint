@@ -54,6 +54,8 @@ namespace NPoint
             var request = BuildRequest(Parameter.RequestSpecs);
             var response = await RequestDispatcher.Dispatch(request, Parameter.Timeout);
 
+            Parameter.OnResponseReceived?.Invoke(response);
+
             return response;
         }
 
@@ -162,8 +164,6 @@ namespace NPoint
 
         private HttpRequestMessage BuildRequest(IEnumerable<Action<IHttpRequestBuilder>> requestSpecs)
         {
-            if (requestSpecs == null) throw new InvalidOperationException("No request specified");
-
             var requestBuilder = RequestBuilderFactory.Create();
 
             foreach (var spec in requestSpecs) spec(requestBuilder);

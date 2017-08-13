@@ -10,23 +10,31 @@ namespace NPoint.Tests
     {
         public class Integration
         {
-            [Fact]
-            public async Task ShouldRetrieveWebPageViaGet()
+            public class Real
             {
-                // Arrange
-                var googleNewsUrl = new Uri("https://news.google.com/news/headlines?ned=us&hl=en");
+                [Fact]
+                public async Task ShouldRetrieveWebPageViaGet()
+                {
+                    // Arrange
+                    var googleNewsUrl = new Uri("https://news.google.com/news/headlines?ned=us&hl=en");
 
-                // Act
-                var result = await new Endpoint()
-                    .Get(googleNewsUrl)
-                    .CallThrough();
+                    // Act
+                    var result = await new Endpoint()
+                        .Get(googleNewsUrl)
+                        .CallThrough();
 
-                // Assert
-                result.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.OK);
-                result.Content.Should().NotBeNull();
+                    // Assert
+                    result.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.OK);
+                    result.Content.Should().NotBeNull();
 
-                var body = await result.Content.ReadAsStringAsync();
-                body.Should().NotBeNullOrWhiteSpace();
+                    var body = await result.Content.ReadAsStringAsync();
+                    body.Should().NotBeNullOrWhiteSpace();
+                }
+            }
+            
+            public class Mock
+            {
+
             }
         }
     }
