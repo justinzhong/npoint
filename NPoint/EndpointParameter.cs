@@ -32,7 +32,7 @@ namespace NPoint
             OnRequestReady = parameter.OnRequestReady;
             OnResponseReceived = parameter.OnResponseReceived;
             OnResponseConverted = parameter.OnResponseConverted;
-            RequestSpecs = parameter.RequestSpecs;
+            RequestSpecs = new List<Action<IHttpRequestBuilder>>(parameter.RequestSpecs);
             Timeout = parameter.Timeout;
         }
     }

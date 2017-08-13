@@ -104,7 +104,13 @@
     <Compile Include="EndpointTest.Integration.cs">
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>
-    <Compile Include="EndpointTest.OnReceived.cs" />
+    <Compile Include="EndpointTest.OnReceived.cs">
+      <DependentUpon>EndpointTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EndpointTest.RequestWith.cs">
+      <DependentUpon>EndpointTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EndpointTest.SetHeader.cs" />
     <Compile Include="EndpointTest.Post.cs">
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>

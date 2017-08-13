@@ -49,7 +49,7 @@ namespace NPoint.Tests
                 var actualTimeout = default(int);
 
                 requestBuilder.Build().Returns(expectedRequest);
-                requestBuilder.SetEndpoint(expectedUrl).Returns(requestBuilder);
+                requestBuilder.SetUrl(expectedUrl).Returns(requestBuilder);
                 requestBuilderFactory.Create().Returns(requestBuilder);
                 requestDispatcher.Dispatch(Arg.Do<HttpRequestMessage>(request => actualRequest = request), Arg.Do<int>(timeout => actualTimeout = timeout)).Returns(Task.FromResult(expectedResponse));
 
@@ -59,7 +59,7 @@ namespace NPoint.Tests
                     .CallThrough();
 
                 // Assert
-                requestBuilder.Received(1).SetEndpoint(Arg.Is(expectedUrl));
+                requestBuilder.Received(1).SetUrl(Arg.Is(expectedUrl));
                 requestBuilder.Received(1).SetHttpMethod(Arg.Is(HttpMethod.Delete));
                 actualTimeout.ShouldBeEquivalentTo(EndpointParameter.DefaultTimeout);
                 actualRequest.RequestUri.ShouldBeEquivalentTo(expectedUrl);
@@ -80,7 +80,7 @@ namespace NPoint.Tests
                 var expectedAccept = new MediaTypeWithQualityHeaderValue("application/json");
 
                 requestBuilder.Build().Returns(expectedRequest);
-                requestBuilder.SetEndpoint(expectedUrl).Returns(requestBuilder);
+                requestBuilder.SetUrl(expectedUrl).Returns(requestBuilder);
                 requestBuilderFactory.Create().Returns(requestBuilder);
                 requestDispatcher.Dispatch(Arg.Do<HttpRequestMessage>(request => actualRequest = request), Arg.Do<int>(timeout => actualTimeout = timeout)).Returns(Task.FromResult(expectedResponse));
 

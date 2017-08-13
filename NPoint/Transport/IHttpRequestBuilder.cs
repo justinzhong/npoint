@@ -12,10 +12,10 @@ namespace NPoint.Transport
         HttpRequestMessage Build();
         IHttpRequestBuilder SetAccept(string accept);
         IHttpRequestBuilder SetBody(string body, string contentType);
-        IHttpRequestBuilder SetEndpoint(Uri url);
-        IHttpRequestBuilder SetHeaders(Action<HttpRequestHeaders> headersSpec);
+        IHttpRequestBuilder SetHeader(Action<HttpRequestHeaders> headerSpec);
         IHttpRequestBuilder SetHttpMethod(HttpMethod method);
         IHttpRequestBuilder SetJson<TPayload>(TPayload payload);
         IHttpRequestBuilder SetRequest(HttpRequestMessage request);
+        IHttpRequestBuilder SetUrl(Uri url);
     }
 }

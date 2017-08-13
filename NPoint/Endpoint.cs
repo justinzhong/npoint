@@ -63,7 +63,7 @@ namespace NPoint
         {
             if (url == null) throw new ArgumentNullException(nameof(url));
 
-            return AppendSpec(builder => builder.SetEndpoint(url)
+            return AppendSpec(builder => builder.SetUrl(url)
                 .SetHttpMethod(HttpMethod.Delete));
         }
 
@@ -71,7 +71,7 @@ namespace NPoint
         {
             if (url == null) throw new ArgumentNullException(nameof(url));
 
-            return AppendSpec(builder => builder.SetEndpoint(url)
+            return AppendSpec(builder => builder.SetUrl(url)
                 .SetHttpMethod(HttpMethod.Get));
         }
 
@@ -79,7 +79,7 @@ namespace NPoint
         {
             if (url == null) throw new ArgumentNullException(nameof(url));
 
-            return AppendSpec(builder => builder.SetEndpoint(url)
+            return AppendSpec(builder => builder.SetUrl(url)
                 .SetHttpMethod(HttpMethod.Head));
         }
 
@@ -89,7 +89,7 @@ namespace NPoint
             if (string.IsNullOrEmpty(body)) throw new ArgumentException("String cannot be empty or null", nameof(body));
             if (string.IsNullOrEmpty(contentType)) throw new ArgumentException("String cannot be empty or null", nameof(contentType));
 
-            return AppendSpec(builder => builder.SetEndpoint(url)
+            return AppendSpec(builder => builder.SetUrl(url)
                 .SetBody(body, contentType)
                 .SetHttpMethod(HttpMethod.Post));
         }
@@ -100,7 +100,7 @@ namespace NPoint
             if (string.IsNullOrEmpty(body)) throw new ArgumentException("String cannot be empty or null", nameof(body));
             if (string.IsNullOrEmpty(contentType)) throw new ArgumentException("String cannot be empty or null", nameof(contentType));
 
-            return AppendSpec(builder => builder.SetEndpoint(url)
+            return AppendSpec(builder => builder.SetUrl(url)
                 .SetBody(body, contentType)
                 .SetHttpMethod(HttpMethod.Put));
         }
@@ -133,7 +133,7 @@ namespace NPoint
         {
             if (headerSpec == null) throw new ArgumentNullException(nameof(headerSpec));
 
-            return AppendSpec(builder => builder.SetHeaders(headerSpec));
+            return AppendSpec(builder => builder.SetHeader(headerSpec));
         }
 
         public IEndpoint TimeoutWhen(int timeout)

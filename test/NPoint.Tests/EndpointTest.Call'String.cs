@@ -29,7 +29,7 @@ namespace NPoint.Tests
 
                 parameter.RequestSpecs.AddRange(new List<Action<IHttpRequestBuilder>>
                 {
-                    { builder => builder.SetEndpoint(expectedUri) },
+                    { builder => builder.SetUrl(expectedUri) },
                     { builder => builder.SetBody(expectedBody, expectedContentType) }
                 });
                 requestBuilder.Build().Returns(expectedRequest);
@@ -41,7 +41,7 @@ namespace NPoint.Tests
                 await sut.Call();
 
                 // Assert
-                requestBuilder.Received(1).SetEndpoint(Arg.Is(expectedUri));
+                requestBuilder.Received(1).SetUrl(Arg.Is(expectedUri));
                 requestBuilder.Received(1).SetBody(Arg.Is(expectedBody), Arg.Is(expectedContentType));
             }
 

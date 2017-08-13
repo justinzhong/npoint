@@ -3,6 +3,7 @@ using NPoint.Transport;
 using NSubstitute;
 using System;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace NPoint.Tests
@@ -26,26 +27,29 @@ namespace NPoint.Tests
             }
 
             [Theory, NPointData(true)]
-            public void ShouldSetEndpointAndHttpGetMethod(Uri url, 
+            public async Task ShouldSetEndpointAndHttpGetMethod(Uri url, 
                 IHttpRequestBuilder requestBuilder, 
                 IHttpRequestBuilderFactory requestBuilderFactory, 
                 IHttpRequestDispatcher requestDispatcher,
-                EndpointParameter parameter)
+                EndpointParameter parameter,
+                HttpRequestMessage request,
+                HttpResponseMessage response)
             {
                 // Arrange
                 var expected = HttpMethod.Get;
-                requestBuilder.SetEndpoint(url).Returns(requestBuilder);
+                requestBuilder.Build().Returns(request);
+                requestBuilder.SetUrl(url).Returns(requestBuilder);
                 requestBuilder.SetHttpMethod(expected).Returns(requestBuilder);
                 requestBuilderFactory.Create().Returns(requestBuilder);
+                requestDispatcher.Dispatch(request, parameter.Timeout).Returns(Task.FromResult(response));
 
                 // Act
                 var sut = new Endpoint(requestBuilderFactory, requestDispatcher, parameter)
                     .Get(url);
-                parameter.RequestSpecs.ForEach(spec => spec(requestBuilder));
+                var actualResponse = await sut.CallThrough();
 
                 // Assert
-                parameter.RequestSpecs.Count.ShouldBeEquivalentTo(1);
-                requestBuilder.Received(1).SetEndpoint(Arg.Is(url));
+                requestBuilder.Received(1).SetUrl(Arg.Is(url));
                 requestBuilder.Received(1).SetHttpMethod(Arg.Is(expected));
             }
         }

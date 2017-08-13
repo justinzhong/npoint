@@ -65,7 +65,7 @@ namespace NPoint.Tests
             {
                 // Arrange
                 request.Method = HttpMethod.Delete;
-                requestBuilder.SetEndpoint(request.RequestUri).Returns(requestBuilder);
+                requestBuilder.SetUrl(request.RequestUri).Returns(requestBuilder);
                 requestBuilder.SetHttpMethod(HttpMethod.Delete).Returns(requestBuilder);
                 requestBuilder.Build().Returns(request);
                 requestBuilderFactory.Create().Returns(requestBuilder);
@@ -82,7 +82,7 @@ namespace NPoint.Tests
                 requestDispatcher.Received(1).Dispatch(Arg.Is(request), Arg.Is(timeout));
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 actualResponse.ShouldBeEquivalentTo(response);
-                requestBuilder.Received(1).SetEndpoint(Arg.Is(request.RequestUri));
+                requestBuilder.Received(1).SetUrl(Arg.Is(request.RequestUri));
                 requestBuilder.Received(1).SetHttpMethod(Arg.Is(HttpMethod.Delete));
             }
         }

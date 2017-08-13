@@ -34,29 +34,32 @@ namespace NPoint.Tests
             }
 
             [Theory, NPointData(true)]
-            public void ShouldSetEndpointHttpMethodAndContent(Uri url,
+            public async Task ShouldSetEndpointHttpMethodAndContent(Uri url,
                 IHttpRequestBuilder requestBuilder,
                 IHttpRequestBuilderFactory requestBuilderFactory,
                 IHttpRequestDispatcher requestDispatcher,
                 string body,
-                EndpointParameter parameter)
+                EndpointParameter parameter,
+                HttpRequestMessage request,
+                HttpResponseMessage response)
             {
                 // Arrange
                 string contentType = "application/json";
                 var expectedHttpMethod = HttpMethod.Put;
-                requestBuilder.SetEndpoint(url).Returns(requestBuilder);
+                requestBuilder.Build().Returns(request);
+                requestBuilder.SetUrl(url).Returns(requestBuilder);
                 requestBuilder.SetHttpMethod(expectedHttpMethod).Returns(requestBuilder);
                 requestBuilder.SetBody(body, contentType).Returns(requestBuilder);
                 requestBuilderFactory.Create().Returns(requestBuilder);
+                requestDispatcher.Dispatch(request, parameter.Timeout).Returns(Task.FromResult(response));
 
                 // Act
                 var sut = new Endpoint(requestBuilderFactory, requestDispatcher, parameter)
                     .Put(url, body, contentType);
-                parameter.RequestSpecs.ForEach(spec => spec(requestBuilder));
+                var actualResponse = await sut.CallThrough();
 
                 // Assert
-                parameter.RequestSpecs.Count.ShouldBeEquivalentTo(1);
-                requestBuilder.Received(1).SetEndpoint(Arg.Is(url));
+                requestBuilder.Received(1).SetUrl(Arg.Is(url));
                 requestBuilder.Received(1).SetHttpMethod(Arg.Is(expectedHttpMethod));
                 requestBuilder.Received(1).SetBody(Arg.Is(body), Arg.Is(contentType));
             }

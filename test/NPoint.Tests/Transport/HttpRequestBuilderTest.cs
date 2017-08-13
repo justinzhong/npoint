@@ -48,7 +48,7 @@ namespace NPoint.Tests.Transport
 
             // Act
             var sut = new HttpRequestBuilder(queryAppender, serializer)
-                .SetHeaders(header =>
+                .SetHeader(header =>
                 {
                     foreach (var key in customHeaders.AllKeys) header.Add(key, customHeaders[key]);
                 });
@@ -106,7 +106,7 @@ namespace NPoint.Tests.Transport
 
             // Act
             var sut = new HttpRequestBuilder(queryAppender, serializer)
-                .SetEndpoint(seedRequestUri)
+                .SetUrl(seedRequestUri)
                 .SetAccept(expectedAccept)
                 .SetBody(expectedContentBody, expectedContentType)
                 .SetHttpMethod(expectedHttpMethod)

@@ -43,14 +43,18 @@ namespace NPoint
             filterConfigSpec(config);
         }
 
+        private void ApplyFilters(EndpointParameter parameter)
+        {
+            ApplyFilter<IFilterHttpRequestConfig>(config => parameter.OnRequestReady = config.HttpRequestFilter.Filter);
+            ApplyFilter<IFilterHttpResponseConfig>(config => parameter.OnResponseReceived = config.HttpResponseFilter.Filter);
+            ApplyFilter<IFilterConvertedResponseConfig>(config => parameter.OnResponseConverted = config.ResponseFilter.Filter);
+        }
+
         private IEndpoint SetupEndpoint<TResponse>(Action<IEndpoint> endpointSpec)
             where TResponse: class
         {
             var parameter = new EndpointParameter();
-
-            ApplyFilter<IFilterHttpRequestConfig>(config => parameter.OnRequestReady = config.HttpRequestFilter.Filter);
-            ApplyFilter<IFilterHttpResponseConfig>(config => parameter.OnResponseReceived = config.HttpResponseFilter.Filter);
-            ApplyFilter<IFilterConvertedResponseConfig>(config => parameter.OnResponseConverted = config.ResponseFilter.Filter);
+            ApplyFilters(parameter);
 
             var endpoint = EndpointFactory.Create(parameter);
             endpointSpec(endpoint);

@@ -62,7 +62,7 @@ namespace NPoint.Tests
                 OnResponseConverted = _ => actualCallbacks.Add("OnResponseConverted"),
                 Timeout = expectedTimeout
             };
-            expectedParameter.RequestSpecs.Add(builder => builder.SetEndpoint(expectedUrl));
+            expectedParameter.RequestSpecs.Add(builder => builder.SetUrl(expectedUrl));
             expectedParameter.RequestSpecs.Add(builder => builder.SetAccept(expectedHeaderAccept));
 
             // Act

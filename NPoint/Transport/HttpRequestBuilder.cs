@@ -65,14 +65,14 @@ namespace NPoint.Transport
             return AppendSpec(request => request.Content = BuildMessageContent(body, contentType));
         }
 
-        public IHttpRequestBuilder SetEndpoint(Uri url)
+        public IHttpRequestBuilder SetUrl(Uri url)
         {
             if (url == null) throw new ArgumentNullException(nameof(url));
 
             return AppendSpec(request => request.RequestUri = url);
         }
 
-        public IHttpRequestBuilder SetHeaders(Action<HttpRequestHeaders> headersSpec)
+        public IHttpRequestBuilder SetHeader(Action<HttpRequestHeaders> headersSpec)
         {
             if (headersSpec == null) throw new ArgumentNullException(nameof(headersSpec));
 
