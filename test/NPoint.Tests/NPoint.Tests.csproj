@@ -83,6 +83,7 @@
   <ItemGroup>
     <Compile Include="AutoNSubstituteDataAttribute.cs" />
     <Compile Include="Config\DefaultApiConfigTest.cs" />
+    <Compile Include="EndpointFactoryTest.cs" />
     <Compile Include="EndpointParameterCustomization.cs" />
     <Compile Include="EndpointParameterTest.cs" />
     <Compile Include="EndpointTest.Call%27String.cs">
@@ -110,11 +111,13 @@
     <Compile Include="EndpointTest.RequestWith.cs">
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>
-    <Compile Include="EndpointTest.SetHeader.cs" />
     <Compile Include="EndpointTest.Post.cs">
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>
     <Compile Include="EndpointTest.Put.cs">
+      <DependentUpon>EndpointTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EndpointTest.SetHeader.cs">
       <DependentUpon>EndpointTest.cs</DependentUpon>
     </Compile>
     <Compile Include="EndpointTest.TimeoutWhen.cs">
