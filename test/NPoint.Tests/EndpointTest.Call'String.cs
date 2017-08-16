@@ -73,6 +73,30 @@ namespace NPoint.Tests
             }
 
             [Theory, NPointData(true)]
+            public void ShouldNotInvokeCallback(IHttpRequestBuilderFactory requestBuilderFactory,
+                IHttpRequestDispatcher requestDispatcher,
+                IHttpRequestBuilder requestBuilder,
+                EndpointParameter parameter,
+                Uri expectedUri,
+                HttpContent expectedContent,
+                HttpRequestMessage expectedRequest,
+                HttpResponseMessage expectedResponse)
+            {
+                // Arrange
+                parameter.OnResponseReceived = null;
+                requestBuilder.Build().Returns(expectedRequest);
+                requestBuilderFactory.Create().Returns(requestBuilder);
+                requestDispatcher.Dispatch(expectedRequest, parameter.Timeout).Returns(Task.FromResult(expectedResponse));
+
+                // Act
+                var sut = new Endpoint(requestBuilderFactory, requestDispatcher, parameter);
+                Func<Task<string>> activity = async () => await sut.Call();
+
+                // Assert
+                activity.ShouldNotThrow("the OnResponseReceived callback is optional");
+            }
+
+            [Theory, NPointData(true)]
             public async Task ShouldReturnResponseBody(IHttpRequestBuilderFactory requestBuilderFactory,
                 IHttpRequestDispatcher requestDispatcher,
                 IHttpRequestBuilder requestBuilder,
