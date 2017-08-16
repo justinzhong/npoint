@@ -1,6 +1,6 @@
 namespace NPoint.Filters
 {
-    public interface IResponseFilter
+    public interface IModelFilter
     {
         void Filter(object response);
     }

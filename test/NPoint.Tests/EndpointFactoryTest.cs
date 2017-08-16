@@ -43,7 +43,7 @@ namespace NPoint.Tests
             // Act
             var sut = new EndpointFactory(requestBuilderFactory, requestDispatcher);
             var endpoint = sut.Create(parameter);
-            var actualResponse = endpoint.CallThrough();
+            var actualResponse = await endpoint.CallThrough();
 
             // Assert
             requestBuilder.Received(1).Build();

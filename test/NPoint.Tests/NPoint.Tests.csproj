@@ -81,6 +81,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApiClientTest.cs" />
     <Compile Include="AutoNSubstituteDataAttribute.cs" />
     <Compile Include="Config\DefaultApiConfigTest.cs" />
     <Compile Include="EndpointFactoryTest.cs" />

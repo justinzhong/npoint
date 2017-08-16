@@ -45,9 +45,9 @@ namespace NPoint
 
         private void ApplyFilters(EndpointParameter parameter)
         {
-            ApplyFilter<IFilterHttpRequestConfig>(config => parameter.OnRequestReady = config.HttpRequestFilter.Filter);
-            ApplyFilter<IFilterHttpResponseConfig>(config => parameter.OnResponseReceived = config.HttpResponseFilter.Filter);
-            ApplyFilter<IFilterConvertedResponseConfig>(config => parameter.OnResponseConverted = config.ResponseFilter.Filter);
+            ApplyFilter<IHttpRequestFilterConfig>(config => parameter.OnRequestReady = config.HttpRequestFilter.Filter);
+            ApplyFilter<IHttpResponseFilterConfig>(config => parameter.OnResponseReceived = config.HttpResponseFilter.Filter);
+            ApplyFilter<IModelFilterConfig>(config => parameter.OnResponseConverted = config.ModelFilter.Filter);
         }
 
         private IEndpoint SetupEndpoint<TResponse>(Action<IEndpoint> endpointSpec)

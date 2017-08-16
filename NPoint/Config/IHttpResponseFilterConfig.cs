@@ -2,7 +2,7 @@ using NPoint.Filters;
 
 namespace NPoint.Config
 {
-    public interface IFilterHttpResponseConfig : IApiConfig
+    public interface IHttpResponseFilterConfig : IApiConfig
     {
         IHttpResponseFilter HttpResponseFilter { get; }
     }

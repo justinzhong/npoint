@@ -55,12 +55,12 @@
     <Compile Include="IApiClient.cs" />
     <Compile Include="IEndpoint.cs" />
     <Compile Include="Filters\IHttpRequestFilter.cs" />
-    <Compile Include="Filters\IResponseFilter.cs" />
+    <Compile Include="Filters\IModelFilter.cs" />
     <Compile Include="Filters\IHttpResponseFilter.cs" />
     <Compile Include="IEndpointFactory.cs" />
-    <Compile Include="Config\IFilterConvertedResponseConfig.cs" />
-    <Compile Include="Config\IFilterHttpRequestConfig.cs" />
-    <Compile Include="Config\IFilterHttpResponseConfig.cs" />
+    <Compile Include="Config\IModelFilterConfig.cs" />
+    <Compile Include="Config\IHttpRequestFilterConfig.cs" />
+    <Compile Include="Config\IHttpResponseFilterConfig.cs" />
     <Compile Include="Serialization\IResponseConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\IJsonSerializer.cs" />
